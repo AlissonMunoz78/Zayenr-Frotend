@@ -9,7 +9,7 @@ export const Home = () => {
         <>
             <header className="container mx-auto py-6 md:flex justify-between items-center px-6">
                 <div className="flex items-center gap-4">
-                    <img src="/epn.png" alt="Logo EPN" className="h-20 w-auto" />
+                    <img src="Public\epn.png" alt="Logo EPN" className="h-20 w-auto" />
                     <h1 className='text-4xl text-teal-800 font-extrabold tracking-wider' style={{ fontFamily: "'Playfair Display', serif" }}>
                         MUSEO <span className='text-green-700'>GUSTAVO ORCÉS</span>
                     </h1>
@@ -28,7 +28,7 @@ export const Home = () => {
                     <h1 className='text-5xl md:text-6xl font-extrabold text-teal-800 uppercase flex flex-col md:flex-row items-center gap-6 justify-center md:justify-start'>
                         <span style={{ fontFamily: "'Playfair Display', serif" }}>Patrimonio Científico</span>
                         <img
-                            src="/museo.png"
+                            src="Public/museo.png"
                             alt="Logo Museo"
                             className="h-36 w-auto inline-block md:ml-6"
                         />
