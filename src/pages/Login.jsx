@@ -33,7 +33,7 @@ export const Login = () => {
 
       if (data.token) {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        localStorage.setItem('usuario', JSON.stringify(data.pasante));
       }
 
       navigate('/dashboard');

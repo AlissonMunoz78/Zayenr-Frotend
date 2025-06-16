@@ -9,11 +9,11 @@ const List = () => {
         const fetchPublicaciones = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/publicaciones`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/exposiciones`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
-                if (!response.ok) throw new Error('No se pudieron cargar las publicaciones.');
+                if (!response.ok) throw new Error('No se pudieron cargar las exposiciones.');
                 
                 const data = await response.json();
                 setPublicaciones(data);
@@ -32,7 +32,7 @@ const List = () => {
 
     return (
         <div>
-            <h1 className="font-black text-4xl text-gray-500">Publicaciones del Museo</h1>
+            <h1 className="font-black text-4xl text-gray-500">Exposiciones del Museo</h1>
             <hr className="my-4 border-gray-300" />
             <p className="mb-8">Explora todas las piezas y audioguías agregadas por los pasantes.</p>
 
