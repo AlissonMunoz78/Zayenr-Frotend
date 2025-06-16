@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import AdminPasantes from "../pages/AdminPasantes"; // componente para admin
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -142,12 +143,19 @@ const Dashboard = () => {
         {/* Sección dinámica */}
         <div className="overflow-y-scroll p-8">
           <Outlet context={{ usuario }} />
+
+          {/* ✅ NUEVO: Mostrar tabla de pasantes si el rol es ADMIN */}
+          {rol === 'ADMIN' && (
+            <div className="mt-10">
+              <AdminPasantes />
+            </div>
+          )}
         </div>
 
         {/* Pie de página */}
         <div className="bg-gray-800 h-12">
           <p className="text-center text-slate-100 leading-[2.9rem] underline">
-            Todos los derechos reservados
+            Todos los derechos reservados @Zayen 2025
           </p>
         </div>
       </div>
