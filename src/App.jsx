@@ -11,6 +11,9 @@ import { NotFound } from './pages/NotFound';
 import { ResetPassword } from './pages/ResetPassword';
 
 import Dashboard from './layouts/Dashboard';
+import DashboardAdmin from './layouts/DashboardAdmin'
+
+import AdminPasantes from './pages/AdminPasantes';
 import Crear from "./pages/Crear";
 import Chat from "./pages/Chat";
 import List from './pages/List';
@@ -34,6 +37,12 @@ function App() {
           <Route path="listar" element={<List />} />
           <Route path="crear" element={<Crear />} />
           <Route path="chat" element={<Chat />} />
+        </Route>
+
+        {/* Dashboard del administrador */}
+        <Route path="admin/dashboard" element={<DashboardAdmin />}>
+          <Route index element={<AdminPasantes />} />
+          {/* Puedes agregar más rutas como /admin/dashboard/estadisticas si deseas */}
         </Route>
 
         <Route path="*" element={<NotFound />} />

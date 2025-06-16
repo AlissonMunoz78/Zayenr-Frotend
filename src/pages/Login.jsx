@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
-// import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'; // <- Comentado: Login con Google
-
-// const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; // <- Comentado: ID cliente Google OAuth
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rol, setRol] = useState(''); // ← NUEVO estado
+  const [rol, setRol] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -17,13 +14,23 @@ export const Login = () => {
     e.preventDefault();
     setError('');
 
+    if (!rol) {
+      setError('Debes seleccionar un rol');
+      return;
+    }
+
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pasantes/login`, {
+      const endpoint =
+        rol === 'ADMIN'
+          ? `${import.meta.env.VITE_BACKEND_URL}/admin/login`
+          : `${import.meta.env.VITE_BACKEND_URL}/pasantes/login`;
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, rol }), // ← SE AGREGA ROL
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -34,46 +41,23 @@ export const Login = () => {
 
       if (data.token) {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.pasante || data.usuario));
-      }
+        localStorage.setItem('usuario', JSON.stringify(data.pasante || data.admin));
 
-      navigate('/dashboard');
+        // Redirigir según el rol
+        if (rol === 'ADMIN') {
+          navigate('/admin/dashboard');
+        } else if (rol === 'PASANTE') {
+          navigate('/dashboard');
+        } else {
+          setError('Rol no reconocido');
+        }
+      }
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // const handleGoogleSuccess = async (credentialResponse) => {
-  //   try {
-  //     const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pasantes/google-login`, {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ token: credentialResponse.credential }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(data.msg || 'Error al iniciar sesión con Google');
-  //     }
-
-  //     if (data.token) {
-  //       localStorage.setItem('token', data.token);
-  //       localStorage.setItem('usuario', JSON.stringify(data.usuario));
-  //     }
-
-  //     navigate('/dashboard');
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  // };
-
-  // const handleGoogleFailure = () => {
-  //   setError('Error en el inicio de sesión con Google');
-  // };
-
   return (
-    // <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}> {/* <- Comentado: Proveedor Google */}
     <div className="min-h-screen flex">
       <div className="w-1/2 hidden md:block">
         <img
@@ -125,7 +109,6 @@ export const Login = () => {
             </div>
           </div>
 
-          {/* NUEVO CAMPO PARA ELEGIR ROL */}
           <div>
             <label className="block text-teal-800 font-semibold mb-2">Tipo de usuario</label>
             <select
@@ -156,14 +139,6 @@ export const Login = () => {
           </button>
         </form>
 
-        {/* <div className="my-6 w-full max-w-md flex justify-center"> */}
-        {/* <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleFailure}
-            useOneTap
-          /> */}
-        {/* </div> */}
-
         <div className="flex justify-between mt-6 w-full max-w-md">
           <Link
             to="/registro"
@@ -180,6 +155,5 @@ export const Login = () => {
         </div>
       </div>
     </div>
-    // </GoogleOAuthProvider> // <- Comentado: cierre del proveedor Google
   );
 };
