@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+// import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'; // <- Comentado: Login con Google
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+// const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; // <- Comentado: ID cliente Google OAuth
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -33,6 +33,7 @@ export const Login = () => {
 
       if (data.token) {
         localStorage.setItem('token', data.token);
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
       }
 
       navigate('/dashboard');
@@ -41,38 +42,37 @@ export const Login = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pasantes/google-login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: credentialResponse.credential }),
-      });
+  // const handleGoogleSuccess = async (credentialResponse) => {
+  //   try {
+  //     const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pasantes/google-login`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ token: credentialResponse.credential }),
+  //     });
 
-      const data = await response.json();
+  //     const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.msg || 'Error al iniciar sesión con Google');
-      }
+  //     if (!response.ok) {
+  //       throw new Error(data.msg || 'Error al iniciar sesión con Google');
+  //     }
 
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
+  //     if (data.token) {
+  //       localStorage.setItem('token', data.token);
+  //       localStorage.setItem('usuario', JSON.stringify(data.usuario));
+  //     }
 
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  //     navigate('/dashboard');
+  //   } catch (err) {
+  //     setError(err.message);
+  //   }
+  // };
 
-  const handleGoogleFailure = () => {
-    setError('Error en el inicio de sesión con Google');
-  };
+  // const handleGoogleFailure = () => {
+  //   setError('Error en el inicio de sesión con Google');
+  // };
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    // <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}> {/* <- Comentado: Proveedor Google */}
       <div className="min-h-screen flex">
         <div className="w-1/2 hidden md:block">
           <img
@@ -140,13 +140,13 @@ export const Login = () => {
             </button>
           </form>
 
-          <div className="my-6 w-full max-w-md flex justify-center">
-            <GoogleLogin
+          {/* <div className="my-6 w-full max-w-md flex justify-center"> */}
+            {/* <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleFailure}
               useOneTap
-            />
-          </div>
+            /> */}
+          {/* </div> */}
 
           <div className="flex justify-between mt-6 w-full max-w-md">
             <Link
@@ -164,6 +164,6 @@ export const Login = () => {
           </div>
         </div>
       </div>
-    </GoogleOAuthProvider>
+    // </GoogleOAuthProvider> // <- Comentado: cierre del proveedor Google
   );
 };
