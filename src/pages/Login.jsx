@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
+import storeAuth from '../context/storeAuth'
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,33 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  
+  /* agregar esto
+  
+    const [showPassword, setShowPassword] = useState(false);
+    const {setToken, setRol}= storeAuth()
+    
+    setToken(response.token)
+    setRol(response.rol)
+
+    codigo login VET: 
+    const Login = () => {
+    const { register, handleSubmit, formState: { errors } } = useForm();
+    const navigate = useNavigate();
+    const { fetchDataBackend } = useFetch(); 
+    const [showPassword, setShowPassword] = useState(false);
+    const {setToken, setRol}= storeAuth()
+
+    const loginUser = async (data) => {
+        const url = `${import.meta.env.VITE_BACKEND_URL}/login`; 
+        const response = await fetchDataBackend(url, data, 'POST');
+        setToken(response.token)
+        setRol(response.rol)
+        if (response) {
+            navigate('/dashboard');
+        }
+    };
+    */
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -31,6 +31,7 @@ function App() {
         <Route path="reset/:token" element={<ResetPassword />} />
         <Route path="nueva-contrasena" element={<NewPassword />} />
 
+        <ProtectedRoute>
         {/* Rutas anidadas dentro de Dashboard */}
         <Route path="dashboard" element={<Dashboard />}>
           <Route index element={<Profile />} /> {/* <== esto carga en /dashboard */}
@@ -38,12 +39,14 @@ function App() {
           <Route path="crear" element={<Crear />} />
           <Route path="chat" element={<Chat />} />
         </Route>
-
         {/* Dashboard del administrador */}
         <Route path="admin/dashboard" element={<DashboardAdmin />}>
           <Route index element={<AdminPasantes />} />
           {/* Puedes agregar más rutas como /admin/dashboard/estadisticas si deseas */}
+          
         </Route>
+        </ProtectedRoute>
+
 
         <Route path="*" element={<NotFound />} />
       </Routes>
