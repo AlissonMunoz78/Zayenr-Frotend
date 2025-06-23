@@ -19,6 +19,9 @@ import Chat from "./pages/Chat";
 import List from './pages/List';
 import Profile from './pages/Profile';
 
+// ✅ IMPORTACIÓN FALTANTE
+import ProtectedRouter from './routers/ProtectedRouter';
+
 function App() {
   return (
     <BrowserRouter>
@@ -31,7 +34,7 @@ function App() {
         <Route path="reset/:token" element={<ResetPassword />} />
         <Route path="nueva-contrasena" element={<NewPassword />} />
 
-        <ProtectedRoute>
+        <ProtectedRouter>
         {/* Rutas anidadas dentro de Dashboard */}
         <Route path="dashboard" element={<Dashboard />}>
           <Route index element={<Profile />} /> {/* <== esto carga en /dashboard */}
@@ -45,7 +48,7 @@ function App() {
           {/* Puedes agregar más rutas como /admin/dashboard/estadisticas si deseas */}
           
         </Route>
-        </ProtectedRoute>
+        </ProtectedRouter>
 
 
         <Route path="*" element={<NotFound />} />

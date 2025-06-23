@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
-import storeAuth from '../context/storeAuth'
+import {
+  FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash
+} from 'react-icons/fa';
+import storeAuth from '../context/storeAuth';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,34 +11,9 @@ export const Login = () => {
   const [rol, setRol] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
-  
-  /* agregar esto
-  
-    const [showPassword, setShowPassword] = useState(false);
-    const {setToken, setRol}= storeAuth()
-    
-    setToken(response.token)
-    setRol(response.rol)
-
-    codigo login VET: 
-    const Login = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
-    const navigate = useNavigate();
-    const { fetchDataBackend } = useFetch(); 
-    const [showPassword, setShowPassword] = useState(false);
-    const {setToken, setRol}= storeAuth()
-
-    const loginUser = async (data) => {
-        const url = `${import.meta.env.VITE_BACKEND_URL}/login`; 
-        const response = await fetchDataBackend(url, data, 'POST');
-        setToken(response.token)
-        setRol(response.rol)
-        if (response) {
-            navigate('/dashboard');
-        }
-    };
-    */
+  const { setToken, setRol: setUserRol } = storeAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,10 +25,9 @@ export const Login = () => {
     }
 
     try {
-      const endpoint =
-        rol === 'ADMIN'
-          ? `${import.meta.env.VITE_BACKEND_URL}/admin/login`
-          : `${import.meta.env.VITE_BACKEND_URL}/pasantes/login`;
+      const endpoint = rol === 'ADMIN'
+        ? `${import.meta.env.VITE_BACKEND_URL}/admin/login`
+        : `${import.meta.env.VITE_BACKEND_URL}/pasantes/login`;
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -68,16 +44,15 @@ export const Login = () => {
       }
 
       if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('usuario', JSON.stringify(data.pasante || data.admin));
+        // Guardar token y rol en Zustand
+        setToken(data.token);
+        setUserRol(rol);
 
-        // Redirigir según el rol
+        // Redirigir
         if (rol === 'ADMIN') {
           navigate('/admin/dashboard');
-        } else if (rol === 'PASANTE') {
-          navigate('/dashboard');
         } else {
-          setError('Rol no reconocido');
+          navigate('/dashboard');
         }
       }
     } catch (err) {

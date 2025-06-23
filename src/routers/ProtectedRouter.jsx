@@ -1,6 +1,9 @@
-const ProtectedRoute =({children}) =>{
-    const token = storeAuth(state => state.token)
-    return token? children : <Navigate to="/login"/>
-}
+import { Navigate, Outlet } from 'react-router-dom';
+import storeAuth from '../context/storeAuth';
 
-export default ProtectedRoute
+const ProtectedRoute = () => {
+  const token = storeAuth(state => state.token);
+  return token ? <Outlet /> : <Navigate to="/login" replace />;
+};
+
+export default ProtectedRoute;
