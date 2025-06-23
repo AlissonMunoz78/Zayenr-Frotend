@@ -36,7 +36,7 @@ function App() {
 
         <ProtectedRouter>
         {/* Rutas anidadas dentro de Dashboard */}
-        <Route path="dashboard" element={<Dashboard />}>
+        <Route path="dashboard/*" element={<Dashboard />}>
           <Route index element={<Profile />} /> {/* <== esto carga en /dashboard */}
           <Route path="listar" element={<List />} />
           <Route path="crear" element={<Crear />} />
