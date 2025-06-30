@@ -1,18 +1,18 @@
-import  {create} from 'zustand'
-import {persist} from 'zustand/middleware'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 // crear la variable global 
-const storeAuth = create (
+const storeAuth = create(
     persist(
-    set  => ({
-    token: null,
-    rol: null,
-    setToken: (token) => set({token}),
-    setRol: (rol) => set({rol}),
-    clearToken: () => set({token: null})
-}),
-{name: "auth-token"}
+        set => ({
+            token: null,
+            rol: null,
+            setToken: (token) => set({ token }),
+            setRol: (rol) => set({ rol }),
+            clearToken: () => set({ token: null })
+        }),
+        { name: "auth-token" }
     )
-   
+
 )
 
 

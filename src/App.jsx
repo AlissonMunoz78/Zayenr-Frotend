@@ -34,6 +34,7 @@ function App() {
         <Route path="reset/:token" element={<ResetPassword />} />
         <Route path="nueva-contrasena" element={<NewPassword />} />
 
+<<<<<<< HEAD
         {/* ✅ Rutas protegidas dentro de un <Route> con element={<ProtectedRouter />} */}
         <Route element={<ProtectedRouter />}>
           <Route path="dashboard" element={<Dashboard />}>
@@ -42,6 +43,23 @@ function App() {
             <Route path="crear" element={<Crear />} />
             <Route path="chat" element={<Chat />} />
           </Route>
+=======
+        <ProtectedRouter>
+        {/* Rutas anidadas dentro de Dashboard */}
+        <Route path="dashboard/*" element={<Dashboard />}>
+          <Route index element={<Profile />} /> {/* <== esto carga en /dashboard */}
+          <Route path="listar" element={<List />} />
+          <Route path="crear" element={<Crear />} />
+          <Route path="chat" element={<Chat />} />
+        </Route>
+        {/* Dashboard del administrador */}
+        <Route path="admin/dashboard" element={<DashboardAdmin />}>
+          <Route index element={<AdminPasantes />} />
+          {/* Puedes agregar más rutas como /admin/dashboard/estadisticas si deseas */}
+          
+        </Route>
+        </ProtectedRouter>
+>>>>>>> a11b79d0ef8def621fb55fa7377eb5a12d613dd7
 
           <Route path="admin/dashboard" element={<DashboardAdmin />}>
             <Route index element={<AdminPasantes />} />
