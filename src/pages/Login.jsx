@@ -31,34 +31,41 @@ export const Login = () => {
 
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
+      console.log('📩 Respuesta del login:', data);
 
       if (!response.ok) {
         throw new Error(data.msg || 'Error al iniciar sesión');
       }
 
-      if (data.token) {
-        // Guardar token y rol en Zustand
-        setToken(data.token);
-        setUserRol(rol);
+      const token = data.token;
+      let usuario = data.admin || data.pasante || data.usuario;
 
-        // Redirigir
-        if (rol === 'ADMIN') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+      if (!usuario) {
+        throw new Error('Usuario no encontrado en la respuesta');
       }
+
+      // Aquí agregamos el rol manualmente porque no viene en la respuesta
+      usuario.rol = rol === 'ADMIN' ? 'ADMINISTRADOR' : 'PASANTE';
+
+      // Guardar en localStorage y Zustand
+      localStorage.setItem('token', token);
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+
+      setToken(token);
+      setUserRol(usuario.rol);
+
+      navigate(usuario.rol === 'ADMINISTRADOR' ? '/admin/dashboard' : '/dashboard');
+
     } catch (err) {
       setError(err.message);
     }
   };
+
 
   return (
     <div className="min-h-screen flex">

@@ -16,44 +16,67 @@ const Dashboard = () => {
     const userString = localStorage.getItem('usuario');
     const token = localStorage.getItem('token');
 
-    let usuarioLS;
-
-    try {
-      usuarioLS = JSON.parse(userString);
-    } catch (error) {
-      console.error('Error al parsear usuario:', error);
+    if (!userString || !token) {
+      console.warn('⚠️ No hay datos de usuario o token en localStorage');
       navigate('/');
       return;
     }
 
-    const obtenerDatosPasante = async () => {
+    let usuarioLS;
+    try {
+      usuarioLS = JSON.parse(userString);
+      if (!usuarioLS?.id || !usuarioLS?.rol) {
+        throw new Error('Usuario incompleto');
+      }
+    } catch (error) {
+      console.error('❌ Error al parsear el usuario del localStorage:', error);
+      localStorage.clear();
+      navigate('/');
+      return;
+    }
+
+    console.log('📦 Usuario cargado del localStorage:', usuarioLS);
+    console.log('🔐 Token cargado:', token);
+    console.log('🎭 Rol detectado:', usuarioLS.rol);
+
+    const obtenerDatosUsuario = async () => {
       try {
-        const respuesta = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/pasantes/perfil/${usuarioLS.id}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const endpoint = usuarioLS.rol?.toUpperCase() === 'ADMINISTRADOR'
+          ? `${import.meta.env.VITE_BACKEND_URL}/admin/perfil/${usuarioLS.id}`
+          : `${import.meta.env.VITE_BACKEND_URL}/pasantes/perfil/${usuarioLS.id}`;
+
+        console.log('🌐 Endpoint al que se hará la petición:', endpoint);
+
+        const respuesta = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         const datos = await respuesta.json();
+        console.log('📩 Respuesta del servidor:', datos);
 
         if (respuesta.ok) {
           setUsuario(datos);
           setRol(datos.rol || 'PASANTE');
         } else {
-          console.error('Error en respuesta del perfil:', datos.msg || datos.error);
+          console.error('⚠️ Error en respuesta del perfil:', datos.msg || datos.error);
+          // Si el token es inválido, limpia y redirige
+          if (respuesta.status === 401) {
+            localStorage.clear();
+            navigate('/');
+          }
         }
       } catch (error) {
-        console.error('Error al obtener perfil del pasante:', error);
+        console.error('❌ Error al obtener perfil del usuario:', error);
       }
     };
 
-    obtenerDatosPasante();
+    obtenerDatosUsuario();
   }, [navigate]);
+
 
   const handleLogout = () => {
     localStorage.removeItem('usuario');
