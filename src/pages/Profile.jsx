@@ -19,7 +19,7 @@ const Profile = () => {
         }
 
         const usuario = JSON.parse(usuarioString);
-        const id = usuario.id;  // <-- Aquí cambió a "id"
+        const id = usuario.id;
 
         if (!id) {
           setError('ID de usuario no encontrado');
@@ -47,44 +47,95 @@ const Profile = () => {
     obtenerPerfil();
   }, []);
 
+  const handleImagenChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPerfil(prev => ({ ...prev, fotoPerfil: reader.result }));
+        // 🔄 Aquí puedes llamar a tu backend para subir la imagen real
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (cargando) return <p className="text-center py-10">Cargando perfil...</p>;
-
   if (error) return <p className="text-center text-red-600 py-10">{error}</p>;
-
   if (!perfil) return <p className="text-center text-red-600 py-10">No se encontró el perfil.</p>;
 
   return (
     <>
-      <div>
-        <h1 className="font-black text-4xl text-gray-500">Perfil del Pasante</h1>
-        <hr className="my-4 border-gray-300" />
-        <p className="mb-8">Aquí puedes ver tu información personal registrada.</p>
+      {/* Vista de perfil solo lectura con imagen */}
+      <div className="bg-white shadow-md rounded-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-10">
+        <div className="flex-shrink-0 text-center">
+          <img
+            src={perfil.fotoPerfil || "https://via.placeholder.com/150"}
+            alt="Foto de perfil"
+            className="w-32 h-32 rounded-full object-cover border border-gray-300 mx-auto"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            className="mt-3"
+            onChange={handleImagenChange}
+          />
+        </div>
+        <div className="flex-grow">
+          <h2 className="text-2xl font-bold text-teal-800 mb-4">Tu Información</h2>
+          <p className="mb-2"><strong>Nombre:</strong> {perfil.nombre}</p>
+          <p className="mb-2"><strong>Email:</strong> {perfil.email}</p>
+          <p className="mb-2"><strong>Facultad:</strong> {perfil.facultad}</p>
+          <p className="mb-2"><strong>Celular:</strong> {perfil.celular}</p>
+          <p className="mb-2"><strong>Rol:</strong> <span className="capitalize">{perfil.rol}</span></p>
+        </div>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-2xl font-bold text-teal-800 mb-4">Tus Datos</h2>
+      {/* Formulario: Cambiar contraseña */}
+      <div className="bg-white shadow-md rounded-lg p-8 mt-10">
+        <h2 className="text-2xl font-bold text-teal-800 mb-4">Cambiar Contraseña</h2>
+        <form>
+          <div className="mb-4">
+            <label className="block text-gray-600 font-semibold">Contraseña Actual</label>
+            <input type="password" className="w-full mt-1 border rounded p-2" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-600 font-semibold">Nueva Contraseña</label>
+            <input type="password" className="w-full mt-1 border rounded p-2" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-600 font-semibold">Confirmar Nueva Contraseña</label>
+            <input type="password" className="w-full mt-1 border rounded p-2" />
+          </div>
+          <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
+            Cambiar Contraseña
+          </button>
+        </form>
+      </div>
+
+      {/* Formulario: Actualizar información personal */}
+      <div className="bg-white shadow-md rounded-lg p-8 mt-10 mb-10">
+        <h2 className="text-2xl font-bold text-teal-800 mb-4">Actualizar Información Personal</h2>
+        <form>
           <div className="mb-4">
             <label className="block text-gray-600 font-semibold">Nombre Completo</label>
-            <p className="text-gray-800 text-lg">{perfil.nombre}</p>
+            <input type="text" className="w-full mt-1 border rounded p-2" defaultValue={perfil.nombre} />
           </div>
           <div className="mb-4">
             <label className="block text-gray-600 font-semibold">Correo Institucional</label>
-            <p className="text-gray-800 text-lg">{perfil.email}</p>
+            <input type="email" className="w-full mt-1 border rounded p-2" defaultValue={perfil.email} />
           </div>
           <div className="mb-4">
             <label className="block text-gray-600 font-semibold">Facultad</label>
-            <p className="text-gray-800 text-lg">{perfil.facultad}</p>
+            <input type="text" className="w-full mt-1 border rounded p-2" defaultValue={perfil.facultad} />
           </div>
           <div className="mb-4">
             <label className="block text-gray-600 font-semibold">Celular</label>
-            <p className="text-gray-800 text-lg">{perfil.celular}</p>
+            <input type="text" className="w-full mt-1 border rounded p-2" defaultValue={perfil.celular} />
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-600 font-semibold">Rol</label>
-            <p className="text-gray-800 text-lg capitalize">{perfil.rol}</p>
-          </div>
-        </div>
+          <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
+            Guardar Cambios
+          </button>
+        </form>
       </div>
     </>
   );
