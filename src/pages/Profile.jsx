@@ -5,8 +5,14 @@ const Profile = () => {
   const [perfil, setPerfil] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
+  const [subiendo, setSubiendo] = useState(false);
 
   useEffect(() => {
+     // Verifica que las variables .env estén cargadas
+    console.log("CLOUD_NAME:", import.meta.env.VITE_CLOUDINARY_NAME);
+    console.log("UPLOAD_PRESET:", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
     const obtenerPerfil = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -50,12 +56,62 @@ const Profile = () => {
   const handleImagenChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPerfil(prev => ({ ...prev, fotoPerfil: reader.result }));
-        // 🔄 Aquí puedes llamar a tu backend para subir la imagen real
-      };
-      reader.readAsDataURL(file);
+      setImagenSeleccionada(file);
+      const previewUrl = URL.createObjectURL(file);
+      setPerfil(prev => ({ ...prev, fotoPerfil: previewUrl }));
+    }
+  };
+
+  const handleGuardarFoto = async () => {
+    if (!imagenSeleccionada) return;
+
+    try {
+      setSubiendo(true);
+
+      const formData = new FormData();
+      formData.append('file', imagenSeleccionada);
+
+      // IMPORTANTE:
+      // El 'upload_preset' debe estar configurado en modo "unsigned" en Cloudinary,
+      // lo que permite subir imágenes directamente desde el frontend sin exponer API_SECRET.
+      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error('Error al subir la imagen');
+
+      const data = await res.json();
+
+      // Actualizar fotoPerfil en backend con la URL segura devuelta por Cloudinary
+      const token = localStorage.getItem('token');
+      const usuarioString = localStorage.getItem('usuario');
+      const usuario = JSON.parse(usuarioString);
+      const id = usuario.id;
+
+      await axios.put(
+        `https://zayenr-backend.onrender.com/api/pasantes/perfil/${id}`,
+        { fotoPerfil: data.secure_url },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setPerfil(prev => ({ ...prev, fotoPerfil: data.secure_url }));
+      setImagenSeleccionada(null);
+      alert('Foto de perfil actualizada correctamente');
+    } catch (error) {
+      console.error(error);
+      alert('Error al subir la imagen');
+    } finally {
+      setSubiendo(false);
     }
   };
 
@@ -69,7 +125,7 @@ const Profile = () => {
       <div className="bg-white shadow-md rounded-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-10">
         <div className="flex-shrink-0 text-center">
           <img
-            src={perfil.fotoPerfil || "https://via.placeholder.com/150"}
+            src={perfil.fotoPerfil || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"}
             alt="Foto de perfil"
             className="w-32 h-32 rounded-full object-cover border border-gray-300 mx-auto"
           />
@@ -79,6 +135,13 @@ const Profile = () => {
             className="mt-3"
             onChange={handleImagenChange}
           />
+          <button
+            onClick={handleGuardarFoto}
+            disabled={!imagenSeleccionada || subiendo}
+            className="mt-2 bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 disabled:opacity-50"
+          >
+            {subiendo ? 'Subiendo...' : 'Guardar Foto'}
+          </button>
         </div>
         <div className="flex-grow">
           <h2 className="text-2xl font-bold text-teal-800 mb-4">Tu Información</h2>
