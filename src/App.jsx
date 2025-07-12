@@ -13,13 +13,12 @@ import { ResetPassword } from './pages/ResetPassword';
 import Dashboard from './layouts/Dashboard';
 import DashboardAdmin from './layouts/DashboardAdmin';
 
-import AdminPasantes from './pages/AdminPasantes';
+import AdminPasantes from './pages/Admin/AdminPasantes';
 import Crear from "./pages/Crear";
 import Chat from "./pages/Chat";
-import List from './pages/List';
+import Exposicion from './pages/Exposicion';
 import Profile from './pages/Profile';
 
-// ✅ IMPORTACIÓN DEL COMPONENTE DE RUTA PROTEGIDA
 import ProtectedRouter from './routers/ProtectedRouter';
 
 function App() {
@@ -34,17 +33,23 @@ function App() {
         <Route path="reset/:token" element={<ResetPassword />} />
         <Route path="nueva-contrasena" element={<NewPassword />} />
 
-        {/* ✅ Rutas protegidas dentro de un <Route> con element={<ProtectedRouter />} */}
+        {/* Rutas protegidas */}
         <Route element={<ProtectedRouter />}>
+          {/* Dashboard usuario normal */}
           <Route path="dashboard" element={<Dashboard />}>
             <Route index element={<Profile />} />
-            <Route path="listar" element={<List />} />
+            <Route path="exposiciones" element={<Exposicion />} />
             <Route path="crear" element={<Crear />} />
             <Route path="chat" element={<Chat />} />
           </Route>
 
+          {/* Dashboard admin */}
           <Route path="admin/dashboard" element={<DashboardAdmin />}>
-            <Route index element={<AdminPasantes />} />
+            <Route index element={<Profile />} />
+            <Route path="pasantes" element={<AdminPasantes />} />
+            <Route path="exposiciones" element={<Exposicion />} />
+            <Route path="crear" element={<Crear />} />
+            <Route path="chat" element={<Chat />} />
           </Route>
         </Route>
 

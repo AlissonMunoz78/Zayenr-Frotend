@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 const AdminPasantes = () => {
   const [pasantes, setPasantes] = useState([]);
   const [error, setError] = useState('');
-  const [selectedId, setSelectedId] = useState(null); // pasante seleccionado para acción
-  const [editId, setEditId] = useState(null); // pasante en modo edición
+  const [selectedId, setSelectedId] = useState(null);
+  const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
   const token = localStorage.getItem('token');
 
@@ -24,7 +24,6 @@ const AdminPasantes = () => {
   }, [token]);
 
   const handleSelect = (id) => {
-    // Si seleccionamos otro pasante mientras editamos, cancelar edición
     if (editId && id !== editId) {
       if (!window.confirm('Estás editando un pasante, ¿quieres cancelar la edición?')) return;
       cancelarEdicion();

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import AdminPasantes from "../pages/AdminPasantes"; // componente para admin
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; 
+import AdminPasantes from "../pages/Admin/AdminPasantes"; 
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -29,15 +30,15 @@ const Dashboard = () => {
         throw new Error('Usuario incompleto');
       }
     } catch (error) {
-      console.error('❌ Error al parsear el usuario del localStorage:', error);
+      console.error(' Error al parsear el usuario del localStorage:', error);
       localStorage.clear();
       navigate('/');
       return;
     }
 
-    console.log('📦 Usuario cargado del localStorage:', usuarioLS);
-    console.log('🔐 Token cargado:', token);
-    console.log('🎭 Rol detectado:', usuarioLS.rol);
+    console.log(' Usuario cargado del localStorage:', usuarioLS);
+    console.log(' Token cargado:', token);
+    console.log(' Rol detectado:', usuarioLS.rol);
 
     const obtenerDatosUsuario = async () => {
       try {
@@ -45,7 +46,7 @@ const Dashboard = () => {
           ? `${import.meta.env.VITE_BACKEND_URL}/admin/perfil/${usuarioLS.id}`
           : `${import.meta.env.VITE_BACKEND_URL}/pasantes/perfil/${usuarioLS.id}`;
 
-        console.log('🌐 Endpoint al que se hará la petición:', endpoint);
+        console.log(' Endpoint al que se hará la petición:', endpoint);
 
         const respuesta = await fetch(endpoint, {
           method: 'GET',
@@ -56,21 +57,20 @@ const Dashboard = () => {
         });
 
         const datos = await respuesta.json();
-        console.log('📩 Respuesta del servidor:', datos);
+        console.log(' Respuesta del servidor:', datos);
 
         if (respuesta.ok) {
           setUsuario(datos);
           setRol(datos.rol || 'PASANTE');
         } else {
-          console.error('⚠️ Error en respuesta del perfil:', datos.msg || datos.error);
-          // Si el token es inválido, limpia y redirige
+          console.error(' Error en respuesta del perfil:', datos.msg || datos.error);
           if (respuesta.status === 401) {
             localStorage.clear();
             navigate('/');
           }
         }
       } catch (error) {
-        console.error('❌ Error al obtener perfil del usuario:', error);
+        console.error(' Error al obtener perfil del usuario:', error);
       }
     };
 
@@ -100,12 +100,12 @@ const Dashboard = () => {
         <h2 className="text-4xl font-black text-center text-slate-200">ZAYEN</h2>
 
         <img
-  src={imagen || 'https://cdn-icons-png.flaticon.com/512/2922/2922561.png'}
-  alt="img-client"
-  className="border-2 border-green-600 rounded-full object-cover"
-  width={50}
-  height={50}
-/>
+          src={imagen || 'https://cdn-icons-png.flaticon.com/512/2922/2922561.png'}
+          alt="img-client"
+          className="border-2 border-green-600 rounded-full object-cover"
+          width={50}
+          height={50}
+        />
 
         <p className="text-slate-400 text-center my-4 text-sm">
           <span className="bg-green-600 w-3 h-3 inline-block rounded-full"></span> Bienvenido - {usuario?.nombre}
@@ -118,7 +118,7 @@ const Dashboard = () => {
         <ul className="mt-5">
           {[
             { to: '/dashboard', label: 'Perfil' },
-            { to: '/dashboard/listar', label: 'Listar' },
+            { to: '/dashboard/exposiciones', label: 'Exposiciones' }, 
             { to: '/dashboard/crear', label: 'Crear' },
             { to: '/dashboard/chat', label: 'Chat' }
           ].map(({ to, label }) => (
@@ -167,7 +167,7 @@ const Dashboard = () => {
         <div className="overflow-y-scroll p-8">
           <Outlet context={{ usuario }} />
 
-          {/* ✅ NUEVO: Mostrar tabla de pasantes si el rol es ADMIN */}
+          {/*  Mostrar tabla de pasantes si el rol es ADMIN */}
           {rol === 'ADMIN' && (
             <div className="mt-10">
               <AdminPasantes />

@@ -9,7 +9,6 @@ const Profile = () => {
   const [subiendo, setSubiendo] = useState(false);
 
   useEffect(() => {
-     // Verifica que las variables .env estén cargadas
     console.log("CLOUD_NAME:", import.meta.env.VITE_CLOUDINARY_NAME);
     console.log("UPLOAD_PRESET:", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
@@ -33,9 +32,15 @@ const Profile = () => {
           return;
         }
 
-        const url = `https://zayenr-backend.onrender.com/api/pasantes/perfil/${id}`;
+        const baseURL = import.meta.env.VITE_BACKEND_URL;
+        const rol = usuario?.rol?.toUpperCase();
 
-        const { data } = await axios.get(url, {
+        const endpoint =
+          rol === 'ADMIN' || rol === 'ADMINISTRADOR'
+            ? `${baseURL}/admin/perfil/${id}`
+            : `${baseURL}/pasantes/perfil/${id}`;
+
+        const { data } = await axios.get(endpoint, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -70,10 +75,6 @@ const Profile = () => {
 
       const formData = new FormData();
       formData.append('file', imagenSeleccionada);
-
-      // IMPORTANTE:
-      // El 'upload_preset' debe estar configurado en modo "unsigned" en Cloudinary,
-      // lo que permite subir imágenes directamente desde el frontend sin exponer API_SECRET.
       formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
       const res = await fetch(
@@ -88,14 +89,21 @@ const Profile = () => {
 
       const data = await res.json();
 
-      // Actualizar fotoPerfil en backend con la URL segura devuelta por Cloudinary
       const token = localStorage.getItem('token');
       const usuarioString = localStorage.getItem('usuario');
       const usuario = JSON.parse(usuarioString);
       const id = usuario.id;
 
+      const baseURL = import.meta.env.VITE_BACKEND_URL;
+      const rol = usuario?.rol?.toUpperCase();
+
+      const endpoint =
+        rol === 'ADMIN' || rol === 'ADMINISTRADOR'
+          ? `${baseURL}/admin/perfil/${id}`
+          : `${baseURL}/pasantes/perfil/${id}`;
+
       await axios.put(
-        `https://zayenr-backend.onrender.com/api/pasantes/perfil/${id}`,
+        endpoint,
         { fotoPerfil: data.secure_url },
         {
           headers: {
