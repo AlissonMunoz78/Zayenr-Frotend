@@ -79,7 +79,7 @@ export const Register = () => {
               <FaEnvelope className="text-teal-700 mr-2" />
               <input
                 type="email"
-                placeholder="ejemplo@espol.edu.ec"
+                placeholder="ejemplo@epn.edu.ec"
                 className="w-full bg-transparent focus:outline-none"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -104,21 +104,31 @@ export const Register = () => {
             </div>
           </div>
 
-          {/* Facultad */}
-          <div>
-            <label className="block text-teal-800 font-semibold mb-1">Facultad</label>
-            <div className="flex items-center border border-teal-300 rounded-lg px-3 py-2">
-              <FaUniversity className="text-teal-700 mr-2" />
-              <input
-                type="text"
-                placeholder="Ingresa tu facultad"
-                className="w-full bg-transparent focus:outline-none"
-                value={facultad}
-                onChange={(e) => setFacultad(e.target.value)}
-                required
-              />
-            </div>
-          </div>
+    {/* Facultad */}
+<div>
+  <label className="block text-teal-800 font-semibold mb-1">Facultad</label>
+  <div className="flex items-center border border-teal-300 rounded-lg px-3 py-2 bg-white">
+    <FaUniversity className="text-teal-700 mr-2" />
+    <select
+      className="w-full bg-white text-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 rounded"
+      value={facultad}
+      onChange={(e) => setFacultad(e.target.value)}
+      required
+    >
+      <option value="" disabled>Selecciona tu facultad</option>
+      <option value="FC">FC</option>
+      <option value="FCA">FCA</option>
+      <option value="FICA">FICA</option>
+      <option value="FIEE">FIEE</option>
+      <option value="FGP">FGP</option>
+      <option value="FIM">FIM</option>
+      <option value="FIQA">FIQA</option>
+      <option value="FIS">FIS</option>
+      <option value="ESFOT">ESFOT</option>
+    </select>
+  </div>
+</div>
+
 
           {/* Celular */}
           <div>

@@ -1,17 +1,29 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 const Profile = () => {
+  const location = useLocation();
   const [perfil, setPerfil] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
+  const [formulario, setFormulario] = useState({
+    nombre: '',
+    email: '',
+    facultad: '',
+    celular: ''
+  });
 
+  const [passwords, setPasswords] = useState({
+    actual: '',
+    nueva: '',
+    confirmar: ''
+  });
+
+  // La función para obtener el perfil se mantiene igual
   useEffect(() => {
-    console.log("CLOUD_NAME:", import.meta.env.VITE_CLOUDINARY_NAME);
-    console.log("UPLOAD_PRESET:", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-
     const obtenerPerfil = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -25,20 +37,11 @@ const Profile = () => {
 
         const usuario = JSON.parse(usuarioString);
         const id = usuario.id;
-
-        if (!id) {
-          setError('ID de usuario no encontrado');
-          setCargando(false);
-          return;
-        }
-
         const baseURL = import.meta.env.VITE_BACKEND_URL;
-        const rol = usuario?.rol?.toUpperCase();
-
-        const endpoint =
-          rol === 'ADMIN' || rol === 'ADMINISTRADOR'
-            ? `${baseURL}/admin/perfil/${id}`
-            : `${baseURL}/pasantes/perfil/${id}`;
+        const esAdmin = location.pathname.startsWith('/admin');
+        const endpoint = esAdmin
+          ? `${baseURL}/admin/perfil/${id}`
+          : `${baseURL}/pasantes/perfil/${id}`;
 
         const { data } = await axios.get(endpoint, {
           headers: {
@@ -46,7 +49,15 @@ const Profile = () => {
           },
         });
 
-        setPerfil(data);
+        // Aseguramos que la data que llega es el perfil correcto
+        const perfilData = data.pasante || data.admin || data;
+        setPerfil(perfilData);
+        setFormulario({
+          nombre: perfilData.nombre,
+          email: perfilData.email,
+          facultad: perfilData.facultad,
+          celular: perfilData.celular
+        });
       } catch (err) {
         console.error('Error al obtener el perfil:', err);
         setError('No se pudo cargar el perfil.');
@@ -56,7 +67,17 @@ const Profile = () => {
     };
 
     obtenerPerfil();
-  }, []);
+  }, [location]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormulario((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleImagenChange = (e) => {
     const file = e.target.files[0];
@@ -85,51 +106,149 @@ const Profile = () => {
         }
       );
 
-      if (!res.ok) throw new Error('Error al subir la imagen');
+      if (!res.ok) throw new Error('Error al subir la imagen a Cloudinary');
 
-      const data = await res.json();
+      const cloudinaryData = await res.json();
+      const imageUrl = cloudinaryData.secure_url;
 
       const token = localStorage.getItem('token');
       const usuarioString = localStorage.getItem('usuario');
       const usuario = JSON.parse(usuarioString);
       const id = usuario.id;
-
       const baseURL = import.meta.env.VITE_BACKEND_URL;
-      const rol = usuario?.rol?.toUpperCase();
+      const esAdmin = location.pathname.startsWith('/admin');
+      const endpoint = esAdmin
+        ? `${baseURL}/admin/perfil/${id}`
+        : `${baseURL}/pasantes/perfil/${id}`;
 
-      const endpoint =
-        rol === 'ADMIN' || rol === 'ADMINISTRADOR'
-          ? `${baseURL}/admin/perfil/${id}`
-          : `${baseURL}/pasantes/perfil/${id}`;
+      // <-- CAMBIO CLAVE: Enviamos el formulario completo junto con la nueva URL de la foto
+      const payload = {
+        ...formulario,
+        fotoPerfil: imageUrl,
+      };
 
-      await axios.put(
+      const { data: backendData } = await axios.put(
         endpoint,
-        { fotoPerfil: data.secure_url },
+        payload,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
+      
+      const updatedProfile = backendData.pasante || backendData.admin || backendData;
 
-      setPerfil(prev => ({ ...prev, fotoPerfil: data.secure_url }));
+      // <-- CAMBIO CLAVE: Actualizamos ambos estados, 'perfil' y 'formulario'
+      setPerfil(updatedProfile);
+      // No necesitamos actualizar el formulario aquí porque ya estaba sincronizado
+
       setImagenSeleccionada(null);
       alert('Foto de perfil actualizada correctamente');
     } catch (error) {
       console.error(error);
-      alert('Error al subir la imagen');
+      alert('Error al actualizar la foto de perfil.');
     } finally {
       setSubiendo(false);
     }
   };
 
+
+  const handleGuardarInfo = async (e) => {
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem('token');
+      const usuarioString = localStorage.getItem('usuario');
+      const usuario = JSON.parse(usuarioString);
+      const id = usuario.id;
+      const baseURL = import.meta.env.VITE_BACKEND_URL;
+      const esAdmin = location.pathname.startsWith('/admin');
+
+      const endpoint = esAdmin
+        ? `${baseURL}/admin/perfil/${id}`
+        : `${baseURL}/pasantes/perfil/${id}`;
+
+      // <-- CAMBIO CLAVE: El payload ahora incluye la foto de perfil actual para no perderla
+      const payload = {
+        ...formulario,
+        fotoPerfil: perfil.fotoPerfil,
+      };
+
+      const { data } = await axios.put(
+        endpoint,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      const updatedProfile = data.pasante || data.admin || data;
+
+      // <-- CAMBIO CLAVE: Actualizamos el estado 'perfil' Y el estado 'formulario'
+      setPerfil(updatedProfile);
+      setFormulario({
+        nombre: updatedProfile.nombre,
+        email: updatedProfile.email,
+        facultad: updatedProfile.facultad,
+        celular: updatedProfile.celular,
+      });
+
+      alert('Información actualizada correctamente');
+    } catch (error) {
+      console.error(error);
+      alert('Error al actualizar la información');
+    }
+  };
+
+
+  // La función de cambiar contraseña se mantiene igual
+  const handleCambiarContrasena = async (e) => {
+    e.preventDefault();
+    if (passwords.nueva !== passwords.confirmar) {
+      alert('Las nuevas contraseñas no coinciden');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const usuarioString = localStorage.getItem('usuario');
+      const usuario = JSON.parse(usuarioString);
+      const id = usuario.id;
+      const baseURL = import.meta.env.VITE_BACKEND_URL;
+      const esAdmin = location.pathname.startsWith('/admin');
+
+      const endpoint = esAdmin
+        ? `${baseURL}/admin/cambiar-password/${id}`
+        : `${baseURL}/pasantes/cambiar-password/${id}`;
+      
+      await axios.put(
+        endpoint,
+        {
+          actual: passwords.actual,
+          nueva: passwords.nueva,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      alert('Contraseña actualizada correctamente');
+      setPasswords({ actual: '', nueva: '', confirmar: '' });
+    } catch (error) {
+      console.error(error);
+      // <-- MEJORA: Mostrar el mensaje de error del backend si existe
+      const errorMessage = error.response?.data?.message || 'Error al actualizar la contraseña';
+      alert(errorMessage);
+    }
+  };
+
+
   if (cargando) return <p className="text-center py-10">Cargando perfil...</p>;
   if (error) return <p className="text-center text-red-600 py-10">{error}</p>;
   if (!perfil) return <p className="text-center text-red-600 py-10">No se encontró el perfil.</p>;
 
+  // El JSX se mantiene igual
   return (
     <>
-      {/* Vista de perfil solo lectura con imagen */}
+      {/* Perfil e imagen */}
       <div className="bg-white shadow-md rounded-lg p-8 mb-10 flex flex-col md:flex-row items-center gap-10">
         <div className="flex-shrink-0 text-center">
           <img
@@ -140,7 +259,7 @@ const Profile = () => {
           <input
             type="file"
             accept="image/*"
-            className="mt-3"
+            className="mt-3 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
             onChange={handleImagenChange}
           />
           <button
@@ -161,21 +280,96 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Formulario: Cambiar contraseña */}
+      {/* Actualizar información personal */}
+      <div className="bg-white shadow-md rounded-lg p-8 mt-10 mb-10">
+        <h2 className="text-2xl font-bold text-teal-800 mb-4">Actualizar Información Personal</h2>
+        <form onSubmit={handleGuardarInfo}>
+          <div className="mb-4">
+            <label className="block text-gray-600 font-semibold">Nombre Completo</label>
+            <input
+              type="text"
+              name="nombre"
+              value={formulario.nombre}
+              onChange={handleInputChange}
+              className="w-full mt-1 border rounded p-2"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-600 font-semibold">Correo Institucional</label>
+            <input
+              type="email"
+              name="email"
+              value={formulario.email}
+              onChange={handleInputChange}
+              className="w-full mt-1 border rounded p-2"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-600 font-semibold">Facultad</label>
+            <input
+              type="text"
+              name="facultad"
+              value={formulario.facultad}
+              onChange={handleInputChange}
+              className="w-full mt-1 border rounded p-2"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-600 font-semibold">Celular</label>
+            <input
+              type="text"
+              name="celular"
+              value={formulario.celular}
+              onChange={handleInputChange}
+              className="w-full mt-1 border rounded p-2"
+              required
+            />
+          </div>
+          <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
+            Guardar Cambios
+          </button>
+        </form>
+      </div>
+      
+      {/* Cambiar contraseña */}
       <div className="bg-white shadow-md rounded-lg p-8 mt-10">
         <h2 className="text-2xl font-bold text-teal-800 mb-4">Cambiar Contraseña</h2>
-        <form>
+        <form onSubmit={handleCambiarContrasena}>
           <div className="mb-4">
             <label className="block text-gray-600 font-semibold">Contraseña Actual</label>
-            <input type="password" className="w-full mt-1 border rounded p-2" />
+            <input
+              type="password"
+              name="actual"
+              value={passwords.actual}
+              onChange={handlePasswordChange}
+              className="w-full mt-1 border rounded p-2"
+              required
+            />
           </div>
           <div className="mb-4">
             <label className="block text-gray-600 font-semibold">Nueva Contraseña</label>
-            <input type="password" className="w-full mt-1 border rounded p-2" />
+            <input
+              type="password"
+              name="nueva"
+              value={passwords.nueva}
+              onChange={handlePasswordChange}
+              className="w-full mt-1 border rounded p-2"
+              required
+            />
           </div>
           <div className="mb-4">
             <label className="block text-gray-600 font-semibold">Confirmar Nueva Contraseña</label>
-            <input type="password" className="w-full mt-1 border rounded p-2" />
+            <input
+              type="password"
+              name="confirmar"
+              value={passwords.confirmar}
+              onChange={handlePasswordChange}
+              className="w-full mt-1 border rounded p-2"
+              required
+            />
           </div>
           <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
             Cambiar Contraseña
@@ -183,31 +377,6 @@ const Profile = () => {
         </form>
       </div>
 
-      {/* Formulario: Actualizar información personal */}
-      <div className="bg-white shadow-md rounded-lg p-8 mt-10 mb-10">
-        <h2 className="text-2xl font-bold text-teal-800 mb-4">Actualizar Información Personal</h2>
-        <form>
-          <div className="mb-4">
-            <label className="block text-gray-600 font-semibold">Nombre Completo</label>
-            <input type="text" className="w-full mt-1 border rounded p-2" defaultValue={perfil.nombre} />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-600 font-semibold">Correo Institucional</label>
-            <input type="email" className="w-full mt-1 border rounded p-2" defaultValue={perfil.email} />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-600 font-semibold">Facultad</label>
-            <input type="text" className="w-full mt-1 border rounded p-2" defaultValue={perfil.facultad} />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-600 font-semibold">Celular</label>
-            <input type="text" className="w-full mt-1 border rounded p-2" defaultValue={perfil.celular} />
-          </div>
-          <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
-            Guardar Cambios
-          </button>
-        </form>
-      </div>
     </>
   );
 };

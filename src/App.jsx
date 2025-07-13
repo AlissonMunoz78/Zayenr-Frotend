@@ -7,7 +7,7 @@ import { Register } from './pages/Registro';
 import { ConfirmAccount } from './pages/ConfirmAccount';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { NewPassword } from './pages/NewPassword';
-import { NotFound } from './pages/NotFound'; 
+import { NotFound } from './pages/NotFound';
 import { ResetPassword } from './pages/ResetPassword';
 
 import Dashboard from './layouts/Dashboard';
