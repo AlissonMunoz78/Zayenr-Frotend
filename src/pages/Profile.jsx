@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import CardPassword from '../components/profile/CardPassword'
+import { CardProfile } from '../components/profile/CardProfile'
+import { CardProfileOwner } from '../components/profile/CardProfileOwner'
+import FormProfile from '../components/profile/FormProfile'
+import storeProfile from '../context/storeProfile'
+
 
 const Profile = () => {
   const location = useLocation();

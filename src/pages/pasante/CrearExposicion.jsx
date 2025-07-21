@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 const Create = () => {
+    const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [imagenFile, setImagenFile] = useState(null);
     const [audioFile, setAudioFile] = useState(null);
@@ -10,24 +11,28 @@ const Create = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!descripcion || !imagenFile || !audioFile) {
-            setError("Todos los campos (descripción, imagen y audio) son obligatorios.");
+        if (!nombre || !descripcion || !imagenFile || !audioFile) {
+            setError("Todos los campos (nombre, descripción, imagen y audio) son obligatorios.");
             return;
         }
+
         setLoading(true);
         setError('');
         setMessage('');
 
         const formData = new FormData();
+        formData.append('nombre', nombre);
         formData.append('descripcion', descripcion);
         formData.append('imagen', imagenFile);
         formData.append('audio', audioFile);
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/publicaciones`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/exposiciones/crearExposicion`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
                 body: formData,
             });
 
@@ -35,6 +40,7 @@ const Create = () => {
             if (!response.ok) throw new Error(data.msg || "Error al crear la publicación");
 
             setMessage('¡Publicación creada con éxito!');
+            setNombre('');
             setDescripcion('');
             setImagenFile(null);
             setAudioFile(null);
@@ -53,6 +59,18 @@ const Create = () => {
             <p className='mb-8'>Añade una nueva pieza a la colección con su imagen y audioguía.</p>
 
             <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-md">
+                <div>
+                    <label className="block mb-1 font-semibold text-gray-600">Nombre de la Pieza</label>
+                    <input
+                        type="text"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        className="w-full border border-gray-300 px-4 py-2 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                        placeholder="Ej: Máscara ceremonial"
+                        required
+                    />
+                </div>
+
                 <div>
                     <label className="block mb-1 font-semibold text-gray-600">Descripción</label>
                     <textarea
@@ -74,7 +92,7 @@ const Create = () => {
                     <label className="block mb-1 font-semibold text-gray-600">Audio Guía</label>
                     <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files[0])} className='w-full' required />
                 </div>
-                
+
                 {message && <p className="text-green-600 text-center">{message}</p>}
                 {error && <p className="text-red-600 text-center">{error}</p>}
 

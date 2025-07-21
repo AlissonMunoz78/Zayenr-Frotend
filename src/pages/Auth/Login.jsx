@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash
 } from 'react-icons/fa';
-import storeAuth from '../context/storeAuth';
+import storeAuth from '../../context/storeAuth';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
