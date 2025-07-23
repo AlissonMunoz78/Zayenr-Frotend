@@ -1,11 +1,10 @@
-import storeAuth from '../context/storeAuth';
-import { Forbidden } from '../pages/Forbidden';
-
+import storeAuth from "../context/storeAuth";
+import { Forbidden } from "../pages/Forbidden";
 
 export default function PrivateRouteWithRole({ children }) {
+  const { rol } = storeAuth();
 
-    const {rol} = storeAuth()
-    
-    return ("paciente" === rol) ? <Forbidden/> : children
-    
+  return rol === "ADMINISTRADOR"||rol === "PASANTE" ? children : <Forbidden />;
+
+  console.log("🔐 Rol actual:", rol);
 }

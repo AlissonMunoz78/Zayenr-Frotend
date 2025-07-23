@@ -1,31 +1,65 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 const ListaPasantes = () => {
   const [pasantes, setPasantes] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const obtenerPasantes = async () => {
+      if (!token) {
+        setError("No autorizado: token no encontrado");
+        return;
+      }
+
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/pasantes`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/admin/pasantes`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.status === 403) {
+          setError("No tienes permisos para acceder a esta información.");
+          setPasantes([]);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Error en la respuesta del servidor");
+        }
+
         const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          setError("Datos recibidos no válidos");
+          setPasantes([]);
+          return;
+        }
+
         setPasantes(data);
+        setError("");
       } catch (err) {
-        setError('Error al cargar pasantes');
+        setError("Error al cargar pasantes: " + err.message);
+        setPasantes([]);
       }
     };
-    obtenerPasantes();
-  }, [token]);
+
+    obtenerPasantes(); // ¡Falta llamar a la función!
+  }, [token]); // <-- Aquí cierras el useEffect correctamente
 
   const handleSelect = (id) => {
     if (editId && id !== editId) {
-      if (!window.confirm('Estás editando un pasante, ¿quieres cancelar la edición?')) return;
+      if (
+        !window.confirm(
+          "Estás editando un pasante, ¿quieres cancelar la edición?"
+        )
+      )
+        return;
       cancelarEdicion();
     }
     setSelectedId(id);
@@ -33,7 +67,7 @@ const ListaPasantes = () => {
 
   const empezarEdicion = () => {
     if (!selectedId) {
-      setError('Selecciona un pasante para editar');
+      setError("Selecciona un pasante para editar");
       return;
     }
     const pasante = pasantes.find((p) => p._id === selectedId);
@@ -41,30 +75,33 @@ const ListaPasantes = () => {
     setEditData({
       nombre: pasante.nombre,
       email: pasante.email,
-      facultad: pasante.facultad || '',
-      celular: pasante.celular || '',
+      facultad: pasante.facultad || "",
+      celular: pasante.celular || "",
     });
-    setError('');
+    setError("");
   };
 
   const cancelarEdicion = () => {
     setEditId(null);
     setEditData({});
-    setError('');
+    setError("");
   };
 
   const guardarEdicion = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/pasantes/${editId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(editData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/admin/pasantes/${editId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(editData),
+        }
+      );
 
-      if (!response.ok) throw new Error('Error al guardar cambios');
+      if (!response.ok) throw new Error("Error al guardar cambios");
 
       setPasantes(
         pasantes.map((p) => (p._id === editId ? { ...p, ...editData } : p))
@@ -77,22 +114,25 @@ const ListaPasantes = () => {
 
   const eliminarPasante = async () => {
     if (!selectedId) {
-      setError('Selecciona un pasante para eliminar');
+      setError("Selecciona un pasante para eliminar");
       return;
     }
-    if (!window.confirm('¿Seguro que deseas eliminar este pasante?')) return;
+    if (!window.confirm("¿Seguro que deseas eliminar este pasante?")) return;
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/pasantes/${selectedId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/admin/pasantes/${selectedId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      if (!response.ok) throw new Error('Error al eliminar');
+      if (!response.ok) throw new Error("Error al eliminar");
 
       setPasantes(pasantes.filter((p) => p._id !== selectedId));
       setSelectedId(null);
       if (editId === selectedId) cancelarEdicion();
-      setError('');
+      setError("");
     } catch (err) {
       setError(err.message);
     }
@@ -104,7 +144,9 @@ const ListaPasantes = () => {
 
   return (
     <div className="p-6 bg-white shadow-md rounded-lg max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-teal-800">Lista de Pasantes</h2>
+      <h2 className="text-2xl font-bold mb-6 text-teal-800">
+        Lista de Pasantes
+      </h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <table className="w-full border border-teal-300 rounded">
@@ -122,7 +164,7 @@ const ListaPasantes = () => {
             <tr
               key={pasante._id}
               className={`text-center border-t border-teal-300 ${
-                selectedId === pasante._id ? 'bg-green-50' : ''
+                selectedId === pasante._id ? "bg-green-50" : ""
               }`}
             >
               <td className="p-2 border border-teal-300">
@@ -170,7 +212,7 @@ const ListaPasantes = () => {
                     placeholder="Facultad"
                   />
                 ) : (
-                  pasante.facultad || '-'
+                  pasante.facultad || "-"
                 )}
               </td>
               <td className="p-2 border border-teal-300">
@@ -184,7 +226,7 @@ const ListaPasantes = () => {
                     placeholder="Celular"
                   />
                 ) : (
-                  pasante.celular || '-'
+                  pasante.celular || "-"
                 )}
               </td>
             </tr>
