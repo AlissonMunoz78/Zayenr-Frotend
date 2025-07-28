@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
+import { Link } from 'react-router-dom';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRAPI_KEY);
 
@@ -9,13 +10,14 @@ export const Donations = () => {
     const handleDonate = async () => {
         const stripe = await stripePromise;
 
-        const res = await fetch('https://zayenr-backend-1.onrender.com/crearDonacion', {
+        const res = await fetch('http://localhost:3000/api/donaciones/crearDonacion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ monto: parseFloat(amount) }),
         });
+
 
         const data = await res.json();
 
@@ -46,6 +48,14 @@ export const Donations = () => {
             >
                 Donar
             </button>
+
+            <Link
+                to="/"
+                className="ml-4 inline-block bg-teal-800 text-white px-6 py-2 rounded hover:bg-teal-700 transition-colors"
+            >
+                Volver
+            </Link>
+
         </div>
     );
 };
