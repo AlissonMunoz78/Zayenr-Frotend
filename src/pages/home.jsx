@@ -6,6 +6,7 @@ import { FaFacebook, FaSquareInstagram, FaXTwitter } from "react-icons/fa6";
 import epn from '../../Public/epn.png'; 
 import museo from '../../Public/museo.png';
 
+
 export const Home = () => {
     return (
         <>
