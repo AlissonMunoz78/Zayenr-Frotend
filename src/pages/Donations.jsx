@@ -10,13 +10,14 @@ export const Donations = () => {
     const handleDonate = async () => {
         const stripe = await stripePromise;
 
-        const res = await fetch('http://localhost:3000/api/donaciones/crearDonacion', {
+        const res = await fetch('https://zayenr-backend.onrender.com/donaciones/crearDonacion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ monto: parseFloat(amount) }),
         });
+        console.log(res)
 
 
         const data = await res.json();

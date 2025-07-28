@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaUniversity, FaPhone, FaArrowLeft } from 'react-icons/fa';
+import mamut from '../../assets/mamut.jpeg'; 
 
 export const Register = () => {
   const [nombre, setNombre] = useState('');
@@ -169,7 +170,7 @@ export const Register = () => {
       {/* Imagen al lado derecho */}
       <div className="w-1/2 hidden md:block">
         <img
-          src="src\assets\mamut.jpeg"
+          src={mamut}
           alt="Registro Museo"
           className="w-full h-full object-cover"
         />

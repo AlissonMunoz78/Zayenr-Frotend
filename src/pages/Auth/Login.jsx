@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash
-} from 'react-icons/fa';
+import {FaUser, FaLock, FaArrowLeft, FaUserPlus, FaEye, FaEyeSlash} from 'react-icons/fa';
 import storeAuth from '../../context/storeAuth';
+import dino from '../../assets/dino.jpg'; 
+
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -71,7 +71,7 @@ export const Login = () => {
     <div className="min-h-screen flex">
       <div className="w-1/2 hidden md:block">
         <img
-          src="src/assets/dino.jpg"
+          src={dino}
           alt="Museo Imagen"
           className="w-full h-full object-cover"
         />

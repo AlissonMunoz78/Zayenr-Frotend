@@ -3,13 +3,15 @@ import { Link } from 'react-router-dom';
 import { MdMuseum } from "react-icons/md";
 import { FaBookOpen, FaChalkboardTeacher } from "react-icons/fa";
 import { FaFacebook, FaSquareInstagram, FaXTwitter } from "react-icons/fa6";
+import epn from '../../Public/epn.png'; 
+import museo from '../../Public/museo.png';
 
 export const Home = () => {
     return (
         <>
             <header className="container mx-auto py-6 md:flex justify-between items-center px-6">
                 <div className="flex items-center gap-4">
-                    <img src="Public\epn.png" alt="Logo EPN" className="h-20 w-auto" />
+                    <img src={epn} alt="Logo EPN" className="h-20 w-auto" />
                     <h1 className='text-4xl text-teal-800 font-extrabold tracking-wider' style={{ fontFamily: "'Playfair Display', serif" }}>
                         MUSEO <span className='text-green-700'>GUSTAVO ORCÉS</span>
                     </h1>
@@ -28,7 +30,7 @@ export const Home = () => {
                     <h1 className='text-5xl md:text-6xl font-extrabold text-teal-800 uppercase flex flex-col md:flex-row items-center gap-6 justify-center md:justify-start'>
                         <span style={{ fontFamily: "'Playfair Display', serif" }}>Patrimonio Científico</span>
                         <img
-                            src="Public/museo.png"
+                            src={museo}
                             alt="Logo Museo"
                             className="h-36 w-auto inline-block md:ml-6"
                         />
