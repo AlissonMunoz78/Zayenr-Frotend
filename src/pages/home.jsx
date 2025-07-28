@@ -85,7 +85,22 @@ export const Home = () => {
                         </p>
                         <Link to="/login" className='inline-block mt-4 bg-teal-800 text-white px-5 py-2 rounded-lg hover:bg-teal-700 transition-colors'>Iniciar Sesión</Link>
                     </div>
+
                 </div>
+
+                <div className="text-center my-14 relative">
+                    <h2 className="font-bold text-4xl inline-block bg-green-50 px-6 relative z-10 text-teal-800 tracking-wide">
+                        ↓↓ AQUÍ PUEDES REALIZAR TUS DONACIONES ↓↓
+                    </h2>
+                    <div className="absolute left-1/2 transform -translate-x-1/2 top-1/2 w-3/4 border-t-4 border-teal-700 z-0"></div>
+                </div>
+                <div className="flex justify-center">
+                    <Link to="/donations" className="inline mt-4 bg-teal-800 text-white px-5 py-2 rounded-lg hover:bg-teal-700 transition-colors">
+                        DONACIONES
+                    </Link>
+                </div>
+
+
             </section>
 
             <footer className='text-center bg-green-50 p-6 sm:px-20 sm:py-10 mt-20 rounded-tr-3xl rounded-tl-3xl space-y-8'>

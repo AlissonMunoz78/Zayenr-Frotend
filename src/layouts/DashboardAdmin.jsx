@@ -76,7 +76,7 @@ const DashboardAdmin = () => {
     <div className="md:flex md:min-h-screen">
       {/* Panel lateral */}
       <div className="md:w-1/5 bg-gray-800 px-5 py-4">
-        <h2 className="text-4xl font-black text-center text-slate-200">ZAYEN ADMIN</h2>
+        <h2 className="text-4xl font-black text-center text-slate-200">ZAYEN {usuario?.rol.toUpperCase()}</h2>
 
         <img
           src={imagen || 'https://cdn-icons-png.flaticon.com/512/2138/2138508.png'}
@@ -90,7 +90,7 @@ const DashboardAdmin = () => {
           <span className="bg-green-600 w-3 h-3 inline-block rounded-full"></span> Bienvenido - {usuario?.nombre}
         </p>
 
-        <p className="text-slate-400 text-center my-4 text-sm">Rol - {rol}</p>
+        <p className="text-slate-400 text-center my-4 text-sm">Rol - {rol.toUpperCase()}</p>
 
         <hr className="mt-5 border-slate-500" />
 

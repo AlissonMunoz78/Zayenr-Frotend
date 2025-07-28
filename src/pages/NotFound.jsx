@@ -6,7 +6,7 @@ export const NotFound = () => {
     <div className="min-h-screen flex flex-col justify-center items-center bg-green-50 p-8">
       {/* Imagen centrada */}
       <img
-        src="src/assets/not-found.png" // Cambia por la ruta de tu imagen
+        src="src\assets\dino-repair.png"
         alt="No encontrado"
         className="w-64 h-64 object-contain mb-8"
       />

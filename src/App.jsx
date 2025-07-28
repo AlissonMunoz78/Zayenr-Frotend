@@ -27,6 +27,11 @@ import Update from "./pages/Update";
 import ProtectedRouter from "./routers/ProtectedRouter";
 import PrivateRouteWithRole from "./routers/PrivateRouteWhitRole";
 
+import { Donations } from "./pages/Donations";
+import { DonationsSuccess } from "./pages/DonationsSuccess";
+import { DonationsCancel } from "./pages/DonationsCancel";
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -38,6 +43,10 @@ function App() {
         <Route path="recuperar" element={<ForgotPassword />} />
         <Route path="reset/:token" element={<ResetPassword />} />
         <Route path="nueva-contrasena" element={<NewPassword />} />
+
+        <Route path="donations" element={<Donations />} />
+        <Route path="donations/success" element={<DonationsSuccess />} />
+        <Route path="donations/cancel" element={<DonationsCancel />} />
 
         {/* Rutas protegidas */}
         <Route element={<ProtectedRouter />}>
