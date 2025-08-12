@@ -79,7 +79,7 @@ const DashboardAdmin = () => {
         <h2 className="text-4xl font-black text-center text-slate-200">ZAYEN {usuario?.rol.toUpperCase()}</h2>
 
         <img
-          src={imagen || 'https://cdn-icons-png.flaticon.com/512/2138/2138508.png'}
+          src={imagen || 'https://cdn-icons-png.flaticon.com/512/4715/4715329.png'}
           alt="img-client"
           className="m-auto mt-8 p-1 border-2 border-slate-500 rounded-full object-cover"
           width={120}

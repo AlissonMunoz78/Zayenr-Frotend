@@ -100,7 +100,7 @@ const Dashboard = () => {
 
         <img
           src={
-            imagen || "https://cdn-icons-png.flaticon.com/512/2922/2922561.png"
+            imagen || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"
           }
           alt="Foto usuario"
           className="border-2 border-green-600 rounded-full object-cover mx-auto my-4"
