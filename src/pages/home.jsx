@@ -106,24 +106,42 @@ export const Home = () => {
 
             </section>
 
-            <footer className='text-center bg-green-50 p-6 sm:px-20 sm:py-10 mt-20 rounded-tr-3xl rounded-tl-3xl space-y-8'>
-                <div className='flex justify-between items-center flex-wrap gap-6'>
-                    <div className='text-3xl font-extrabold text-teal-800'>Contáctanos</div>
-                    <ul className='flex gap-6 mt-4 sm:mt-0 text-teal-800'>
-                        <li><FaFacebook className='text-3xl hover:text-green-700 transition-colors' /></li>
-                        <li><FaSquareInstagram className='text-3xl hover:text-green-700 transition-colors' /></li>
-                        <li><FaXTwitter className='text-3xl hover:text-green-700 transition-colors' /></li>
-                    </ul>
-                </div>
+<footer className='text-center bg-green-50 p-6 sm:px-20 sm:py-10 mt-20 rounded-tr-3xl rounded-tl-3xl space-y-8'>
+    <div className='flex justify-between items-center flex-wrap gap-6'>
+        <div className='text-3xl font-extrabold text-teal-800'>Contáctanos</div>
+        <ul className='flex gap-6 mt-4 sm:mt-0 text-teal-800'>
+            <li>
+                <a
+                    href="https://www.facebook.com/MuseoGustavoOrcesEPN?locale=es_LA"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook Museo Gustavo Orcés"
+                >
+                    <FaFacebook className='text-3xl hover:text-green-700 transition-colors' />
+                </a>
+            </li>
+            <li>
+                <a
+                    href="https://www.instagram.com/mhngov?igsh=aHFzcjB2ZDNiM2o5"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram Museo Gustavo Orcés"
+                >
+                    <FaSquareInstagram className='text-3xl hover:text-green-700 transition-colors' />
+                </a>
+            </li>
+        </ul>
+    </div>
 
-                <div className='text-left text-gray-800 font-medium'>
-                    <p className='my-2'>Email: <span className='font-semibold'>info@museogustavorces.ec</span></p>
-                    <p>Teléfono: <span className='font-semibold'>02 123 4567</span></p>
-                </div>
+    <div className='text-left text-gray-800 font-medium'>
+        <p className='my-2'>Email: <span className='font-semibold'>info@museogustavorces.ec</span></p>
+        <p>Teléfono: <span className='font-semibold'>02 123 4567</span></p>
+    </div>
 
-                <hr className='border-t-2 border-teal-800' />
-                <p className='font-semibold text-teal-800'>© 2025 Museo Gustavo Orcés</p>
-            </footer>
+    <hr className='border-t-2 border-teal-800' />
+    <p className='font-semibold text-teal-800'>© 2025 Museo Gustavo Orcés</p>
+</footer>
+
         </>
     );
 };

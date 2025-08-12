@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { Home } from "./pages/home";
 import { Login } from "./pages/Auth/Login";
@@ -14,8 +14,8 @@ import Dashboard from "./layouts/Dashboard";
 import DashboardAdmin from "./layouts/DashboardAdmin";
 
 import AdminPasantes from "./pages/Admin/PerfilAdmin";
-import { FormPasante } from "./components/create/Form"; // para pasantes
-import { Crear } from "./pages/pasante/CrearExposicion"; // para exposiciones
+import { FormPasante } from "./components/create/Form";
+import { Crear } from "./pages/pasante/CrearExposicion";
 import Chat from "./pages/Chat";
 import Exposicion from "./pages/pasante/MisExposiciones";
 import Profile from "./pages/Profile";
@@ -31,6 +31,37 @@ import { Donations } from "./pages/Donations";
 import { DonationsSuccess } from "./pages/DonationsSuccess";
 import { DonationsCancel } from "./pages/DonationsCancel";
 
+// Store para token y rol
+import storeAuth from "./context/storeAuth";
+
+// Componente que procesa el callback de OAuth
+function OAuthHandler() {
+  const location = useLocation();
+  const { setToken, setRol } = storeAuth();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    const rol = params.get("rol");
+
+    if (token && rol) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("usuario", JSON.stringify({ rol }));
+      setToken(token);
+      setRol(rol.toLowerCase());
+
+      if (rol.toLowerCase().includes("admin")) {
+        window.location.replace("/admin/dashboard");
+      } else {
+        window.location.replace("/dashboard");
+      }
+    } else {
+      window.location.replace("/login");
+    }
+  }, [location.search, setToken, setRol]);
+
+  return <p>Procesando inicio de sesión...</p>;
+}
 
 function App() {
   return (
@@ -47,6 +78,9 @@ function App() {
         <Route path="donations" element={<Donations />} />
         <Route path="donations/success" element={<DonationsSuccess />} />
         <Route path="donations/cancel" element={<DonationsCancel />} />
+
+        {/* Ruta callback OAuth */}
+        <Route path="oauth-callback" element={<OAuthHandler />} />
 
         {/* Rutas protegidas */}
         <Route element={<ProtectedRouter />}>
