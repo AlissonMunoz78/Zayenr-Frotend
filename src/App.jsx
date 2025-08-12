@@ -85,7 +85,7 @@ function App() {
         {/* Rutas protegidas */}
         <Route element={<ProtectedRouter />}>
           {/* Dashboard usuario normal */}
-          <Route path="dashboard/*" element={<Dashboard />}>
+          <Route path="pasante/dashboard/*" element={<Dashboard />}>
             <Route index element={<Profile />} />
             <Route path="exposiciones" element={<Exposicion />} />
             <Route path="listar" element={<List />} />
