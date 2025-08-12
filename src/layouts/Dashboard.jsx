@@ -39,8 +39,8 @@ const Dashboard = () => {
       try {
         const endpoint =
           usuarioLS.rol?.toUpperCase() === "ADMINISTRADOR"
-            ? `${import.meta.env.VITE_BACKEND_URL}/admin/perfil/${usuarioLS.id}`
-            : `${import.meta.env.VITE_BACKEND_URL}/pasantes/perfil/${
+            ? `${import.meta.env.VITE_BACKEND_URL}/api/admin/perfil/${usuarioLS.id}`
+            : `${import.meta.env.VITE_BACKEND_URL}/api/pasantes/perfil/${
                 usuarioLS.id
               }`;
 

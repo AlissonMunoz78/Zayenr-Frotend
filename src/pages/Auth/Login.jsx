@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaLock, FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import storeAuth from "../../context/storeAuth";
@@ -19,10 +19,11 @@ export const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Determinar el endpoint según el rol
       const endpoint =
         rol === "ADMIN"
           ? `${import.meta.env.VITE_BACKEND_URL}/admin/login`
-          : `${import.meta.env.VITE_BACKEND_URL}/pasantes/login`;
+          : `${import.meta.env.VITE_BACKEND_URL}/pasante/login`;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -34,31 +35,53 @@ export const Login = () => {
       if (!response.ok) throw new Error(data.msg || "Error al iniciar sesión");
 
       const token = data.token;
-      const usuario = data.admin || data.pasante || data.usuario;
+      const usuario = data.admin || data.pasante;
+
       if (!usuario?.rol) throw new Error("Rol del usuario no definido");
 
-      const rolNormalizado = usuario.rol.toLowerCase();
+      // Guardamos el token y los datos del usuario
       localStorage.setItem("token", token);
       localStorage.setItem("usuario", JSON.stringify(usuario));
       setToken(token);
-      setUserRol(rolNormalizado);
+      setUserRol(usuario.rol.toLowerCase());
 
-      if (rolNormalizado.includes("admin")) {
+      // Redirigir según el rol
+      if (usuario.rol.toLowerCase().includes("admin")) {
         navigate("/admin/dashboard");
-      } else if (rolNormalizado === "pasante") {
-        navigate("/dashboard");
+      } else if (usuario.rol.toLowerCase() === "pasante") {
+        navigate("/pasante/dashboard");
       } else {
-        throw new Error("Rol no reconocido: " + rolNormalizado);
+        throw new Error("Rol no reconocido: " + usuario.rol);
       }
     } catch (err) {
       setError(err.message);
     }
-  }; // commit
+  };
 
   const handleGoogleLogin = () => {
     // Redirige al backend que maneja Google OAuth
     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
   };
+
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (token) {
+      // Guardamos el token en localStorage
+      localStorage.setItem("token", token);
+
+      // Redirigimos según el rol del usuario
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const rol = usuario?.rol?.toLowerCase();
+
+      if (rol === "admin") {
+        navigate("/admin/dashboard");
+      } else if (rol === "pasante") {
+        navigate("/pasante/dashboard");
+      } else {
+        setError("Rol de usuario no reconocido");
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex">
