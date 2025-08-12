@@ -55,10 +55,6 @@ export const Login = () => {
     }
   };
 
-  const handleMicrosoftLogin = () => {
-    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/microsoft`;
-  };
-
   const handleGoogleLogin = () => {
     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
   };
@@ -138,36 +134,38 @@ export const Login = () => {
 
           {rol === "PASANTE" && (
             <>
-              {/* Botón de Microsoft */}
+              {/* Botón de Google */}
               <button
                 type="button"
-                onClick={handleMicrosoftLogin}
-                className="w-full mt-4 flex items-center justify-center bg-black text-white font-semibold py-3 rounded-lg hover:bg-gray-900 transition-colors shadow-md animate-fadeIn"
+                onClick={handleGoogleLogin}
+                className="w-full mt-4 flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-medium py-3 rounded-lg hover:bg-gray-50 transition-colors shadow-sm animate-fadeIn"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="mr-3" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect width="11" height="11" fill="#F35325" />
-                  <rect x="13" width="11" height="11" fill="#81BC06" />
-                  <rect y="13" width="11" height="11" fill="#05A6F0" />
-                  <rect x="13" y="13" width="11" height="11" fill="#FFBA08" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mr-3"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 48 48"
+                >
+                  <path
+                    fill="#EA4335"
+                    d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.5 2.6 30.1 0 24 0 14.6 0 6.4 5.4 2.4 13.2l7.9 6.1C12.3 13.1 17.7 9.5 24 9.5z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M46.1 24.5c0-1.6-.1-3.2-.4-4.7H24v9h12.4c-.5 2.8-2.1 5.2-4.5 6.8l7 5.4c4.1-3.8 6.5-9.4 6.5-16.5z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M10.3 28.7c-1.2-2.8-1.2-6 0-8.8l-7.9-6.1c-3.4 6.8-3.4 14.8 0 21.6l7.9-6.7z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M24 48c6.1 0 11.4-2 15.2-5.5l-7-5.4c-2 1.3-4.7 2.1-8.2 2.1-6.3 0-11.6-4.3-13.5-10.2l-7.9 6.1C6.4 42.6 14.6 48 24 48z"
+                  />
                 </svg>
-                Iniciar sesión con Microsoft
+                Iniciar sesión con Google
               </button>
-
-             {/* Botón de Google */}
-<button
-  type="button"
-  onClick={handleGoogleLogin}
-  className="w-full mt-4 flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-100 transition-colors shadow-md animate-fadeIn"
->
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" className="mr-3">
-    <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.5 2.6 29.9 0 24 0 14.6 0 6.3 5.4 2.5 13.3l7.9 6.2C12.1 13.4 17.6 9.5 24 9.5z" />
-    <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 2.8-2.1 5.2-4.4 6.8l6.8 6.8C43.5 38.4 46.5 31.9 46.5 24.5z" />
-    <path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.9-.8-4.3s.3-3 .8-4.3l-7.9-6.2C1.6 16.4 0 20.1 0 24s1.6 7.6 2.5 10.5l7.9-6.2z" />
-    <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.8-5.8l-6.8-6.8c-2 1.4-4.6 2.3-9 2.3-6.4 0-11.9-3.9-14-9.4l-7.9 6.2C6.3 42.6 14.6 48 24 48z" />
-  </svg>
-  Iniciar sesión con Google
-</button>
-
 
               <div className="text-right mt-2">
                 <button
@@ -175,7 +173,7 @@ export const Login = () => {
                   onClick={() => navigate("/")}
                   className="text-sm text-teal-700 hover:underline"
                 >
-                  Volver 
+                  Volver
                 </button>
               </div>
             </>
