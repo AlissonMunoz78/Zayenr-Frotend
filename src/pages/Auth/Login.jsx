@@ -7,7 +7,7 @@ import { useMsal } from "@azure/msal-react";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [passwords, setPasswords] = useState("");
   const [rol, setRol] = useState("ADMIN"); // Valor inicial ADMIN
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +27,7 @@ export const Login = () => {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password: passwords }),
       });
 
       const data = await response.json();
@@ -56,15 +56,18 @@ export const Login = () => {
   };
 
   const handleGoogleLogin = () => {
+    // Redirige al backend que maneja Google OAuth
     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
   };
 
   return (
     <div className="min-h-screen flex">
+      {/* Imagen lateral */}
       <div className="w-1/2 hidden md:block">
         <img src={dino} alt="Museo" className="w-full h-full object-cover" />
       </div>
 
+      {/* Formulario */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 bg-green-50">
         <h2 className="text-4xl font-bold text-teal-900 mb-8">Iniciar Sesión</h2>
 
@@ -101,8 +104,8 @@ export const Login = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Ingresa tu contraseña"
                     className="w-full focus:outline-none bg-transparent pr-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={passwords}
+                    onChange={(e) => setPasswords(e.target.value)}
                     required
                   />
                   <button
