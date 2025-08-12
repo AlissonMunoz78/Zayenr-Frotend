@@ -53,7 +53,7 @@ export const Login = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }; // commit
 
   const handleGoogleLogin = () => {
     // Redirige al backend que maneja Google OAuth
