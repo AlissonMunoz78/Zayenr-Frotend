@@ -13,10 +13,29 @@ const Dashboard = () => {
   const urlActual = location.pathname;
 
   useEffect(() => {
-    const userString = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
+    // Capturar el token de la URL
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (token) {
+      // Guardamos el token en localStorage
+      localStorage.setItem("token", token);
 
-    if (!userString || !token) {
+      // Redirigimos según el rol del usuario
+      const usuarioLS = JSON.parse(localStorage.getItem("usuario"));
+      const rol = usuarioLS?.rol?.toLowerCase();
+
+      if (rol === "admin") {
+        navigate("/admin/dashboard");
+      } else if (rol === "pasante") {
+        navigate("/pasante/dashboard");
+      } else {
+        console.error("Rol de usuario no reconocido");
+      }
+    }
+
+    const userString = localStorage.getItem("usuario");
+    const tokenLS = localStorage.getItem("token");
+
+    if (!userString || !tokenLS) {
       console.warn("⚠️ No hay datos de usuario o token en localStorage");
       navigate("/");
       return;
@@ -48,7 +67,7 @@ const Dashboard = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenLS}`,
           },
         });
 
@@ -99,9 +118,7 @@ const Dashboard = () => {
         </h2>
 
         <img
-          src={
-            imagen || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"
-          }
+          src={imagen || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"}
           alt="Foto usuario"
           className="border-2 border-green-600 rounded-full object-cover mx-auto my-4"
           width={120}
@@ -118,20 +135,14 @@ const Dashboard = () => {
         <hr className="mt-5 border-slate-500" />
 
         <ul className="mt-5">
-          {[
-            { to: "/dashboard", label: "Perfil" },
-            { to: "/dashboard/exposiciones", label: "Exposiciones" },
-            { to: "/dashboard/crear", label: "Crear" },
-            { to: "/dashboard/chat", label: "Chat" },
-          ].map(({ to, label }) => (
+          {[{ to: "/dashboard", label: "Perfil" }, { to: "/dashboard/exposiciones", label: "Exposiciones" }, { to: "/dashboard/crear", label: "Crear" }, { to: "/dashboard/chat", label: "Chat" }].map(({ to, label }) => (
             <li key={to} className="text-center">
               <Link
                 to={to}
-                className={`${
-                  urlActual === to
+                className={`${urlActual === to
                     ? "text-slate-200 bg-gray-900 px-3 py-2 rounded-md"
                     : "text-slate-600"
-                } text-xl block mt-2 hover:text-slate-600`}
+                  } text-xl block mt-2 hover:text-slate-600`}
               >
                 {label}
               </Link>
@@ -149,10 +160,7 @@ const Dashboard = () => {
           </div>
           <div>
             <img
-              src={
-                imagen ||
-                "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"
-              }
+              src={imagen || "https://cdn-icons-png.flaticon.com/512/4715/4715329.png"}
               alt="Foto usuario"
               className="border-2 border-green-600 rounded-full object-cover"
               width={50}

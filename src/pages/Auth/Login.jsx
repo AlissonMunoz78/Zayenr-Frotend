@@ -64,24 +64,32 @@ export const Login = () => {
   };
 
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get("token");
-    if (token) {
-      // Guardamos el token en localStorage
-      localStorage.setItem("token", token);
+  const token = new URLSearchParams(window.location.search).get("token");
+  const usuario = new URLSearchParams(window.location.search).get("usuario");
 
-      // Redirigimos según el rol del usuario
-      const usuario = JSON.parse(localStorage.getItem("usuario"));
-      const rol = usuario?.rol?.toLowerCase();
+  if (token) {
+    // Guardamos el token en localStorage
+    localStorage.setItem("token", token);
 
-      if (rol === "admin") {
-        navigate("/admin/dashboard");
-      } else if (rol === "pasante") {
-        navigate("/pasante/dashboard");
-      } else {
-        setError("Rol de usuario no reconocido");
-      }
+    // Guardamos los detalles del usuario en localStorage
+    if (usuario) {
+      localStorage.setItem("usuario", usuario);
     }
-  }, []);
+
+    // Redirigimos según el rol del usuario
+    const parsedUsuario = JSON.parse(usuario);
+    const rol = parsedUsuario?.rol?.toLowerCase();
+
+    if (rol === "admin") {
+      navigate("/admin/dashboard");
+    } else if (rol === "pasante") {
+      navigate("/pasante/dashboard");
+    } else {
+      setError("Rol de usuario no reconocido");
+    }
+  }
+}, []);
+
 
   return (
     <div className="min-h-screen flex">
