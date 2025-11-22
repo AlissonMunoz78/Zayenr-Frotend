@@ -1,10 +1,12 @@
+// src/routers/PrivateRouteWithRole.jsx
 import storeAuth from "../context/storeAuth";
 import { Forbidden } from "../pages/Forbidden";
 
-export default function PrivateRouteWithRole({ children }) {
+export default function PrivateRouteWithRole({ children, rolPermitido }) {
   const { rol } = storeAuth();
+  const rolNormalizado = rol?.toLowerCase();
 
-  return rol === "ADMINISTRADOR"||rol === "PASANTE" ? children : <Forbidden />;
-
-  console.log("🔐 Rol actual:", rol);
+  return rolNormalizado === rolPermitido.toLowerCase()
+    ? children
+    : <Forbidden />;
 }

@@ -45,15 +45,16 @@ function OAuthHandler() {
     const rol = params.get("rol");
 
     if (token && rol) {
+      const rolNormalizado = rol.toLowerCase(); // admin | pasante
       localStorage.setItem("token", token);
-      localStorage.setItem("usuario", JSON.stringify({ rol }));
+      localStorage.setItem("usuario", JSON.stringify({ rol: rolNormalizado }));
       setToken(token);
-      setRol(rol.toLowerCase());
+      setRol(rolNormalizado);
 
-      if (rol.toLowerCase().includes("admin")) {
+      if (rolNormalizado === "admin") {
         window.location.replace("/admin/dashboard");
       } else {
-        window.location.replace("/dashboard");
+        window.location.replace("/pasante/dashboard");
       }
     } else {
       window.location.replace("/login");
@@ -84,7 +85,7 @@ function App() {
 
         {/* Rutas protegidas */}
         <Route element={<ProtectedRouter />}>
-          {/* Dashboard usuario normal */}
+          {/* Dashboard pasante */}
           <Route path="pasante/dashboard/*" element={<Dashboard />}>
             <Route index element={<Profile />} />
             <Route path="exposiciones" element={<Exposicion />} />
