@@ -3,23 +3,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaLock, FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import storeAuth from "../../context/storeAuth";
 import dino from "../../assets/dino.jpg";
-import { useMsal } from "@azure/msal-react";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [passwords, setPasswords] = useState("");
-  const [rol, setRol] = useState("ADMIN"); // Valor inicial ADMIN
+  const [rol, setRol] = useState("ADMIN");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
   const { setToken, setRol: setUserRol } = storeAuth();
-  const { instance } = useMsal();
 
+  // Manejo del login tradicional (Admin)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    
     try {
-      // Determinar el endpoint según el rol
       const endpoint =
         rol === "ADMIN"
           ? `${import.meta.env.VITE_BACKEND_URL}/admin/login`
@@ -39,13 +39,11 @@ export const Login = () => {
 
       if (!usuario?.rol) throw new Error("Rol del usuario no definido");
 
-      // Guardamos el token y los datos del usuario
       localStorage.setItem("token", token);
       localStorage.setItem("usuario", JSON.stringify(usuario));
       setToken(token);
       setUserRol(usuario.rol.toLowerCase());
 
-      // Redirigir según el rol
       if (usuario.rol.toLowerCase().includes("admin")) {
         navigate("/admin/dashboard");
       } else if (usuario.rol.toLowerCase() === "pasante") {
@@ -58,38 +56,49 @@ export const Login = () => {
     }
   };
 
+  // Login con Google (solo para pasantes)
   const handleGoogleLogin = () => {
-    // Redirige al backend que maneja Google OAuth
+    // Redirige al backend que maneja la autenticación con Google
     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
   };
 
+  // Verificar si viene de un callback OAuth exitoso
   useEffect(() => {
-  const token = new URLSearchParams(window.location.search).get("token");
-  const usuario = new URLSearchParams(window.location.search).get("usuario");
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const rolParam = params.get("rol");
 
-  if (token) {
-    // Guardamos el token en localStorage
-    localStorage.setItem("token", token);
+    if (token && rolParam) {
+      const rolNormalizado = rolParam.toLowerCase();
+      
+      // Crear objeto usuario con todos los datos disponibles
+      const usuario = {
+        id: params.get("id") || "",
+        rol: rolNormalizado,
+        nombre: params.get("nombre") || "",
+        email: params.get("email") || "",
+        facultad: params.get("facultad") || "",
+        celular: params.get("celular") || ""
+      };
 
-    // Guardamos los detalles del usuario en localStorage
-    if (usuario) {
-      localStorage.setItem("usuario", usuario);
+      localStorage.setItem("token", token);
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+      setToken(token);
+      setUserRol(rolNormalizado);
+
+      // Limpiar los parámetros de la URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      // Redirigir según el rol
+      if (rolNormalizado === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else if (rolNormalizado === "pasante") {
+        navigate("/pasante/dashboard", { replace: true });
+      } else {
+        setError("Rol de usuario no reconocido");
+      }
     }
-
-    // Redirigimos según el rol del usuario
-    const parsedUsuario = JSON.parse(usuario);
-    const rol = parsedUsuario?.rol?.toLowerCase();
-
-    if (rol === "admin") {
-      navigate("/admin/dashboard");
-    } else if (rol === "pasante") {
-      navigate("/pasante/dashboard");
-    } else {
-      setError("Rol de usuario no reconocido");
-    }
-  }
-}, []);
-
+  }, [navigate, setToken, setUserRol]);
 
   return (
     <div className="min-h-screen flex">
@@ -106,6 +115,26 @@ export const Login = () => {
           className="w-full max-w-md space-y-6 bg-white p-6 rounded-xl shadow-lg"
           onSubmit={handleSubmit}
         >
+          {/* Selector de tipo de usuario */}
+          <div>
+            <label className="block text-teal-800 font-semibold mb-2">
+              Tipo de usuario
+            </label>
+            <select
+              value={rol}
+              onChange={(e) => {
+                setRol(e.target.value);
+                setError(""); // Limpiar errores al cambiar
+              }}
+              required
+              className="w-full border border-teal-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 bg-white"
+            >
+              <option value="ADMIN">Administrador</option>
+              <option value="PASANTE">Pasante</option>
+            </select>
+          </div>
+
+          {/* Campos de login tradicional (solo para Admin) */}
           {rol === "ADMIN" && (
             <>
               <div>
@@ -148,31 +177,38 @@ export const Login = () => {
                   </button>
                 </div>
               </div>
+
+              <button
+                type="submit"
+                className="w-full bg-teal-800 text-white py-3 rounded-lg hover:bg-teal-700 transition-colors font-semibold"
+              >
+                Iniciar sesión
+              </button>
+
+              <div className="text-right">
+                <Link
+                  to="/recuperar"
+                  className="text-sm text-teal-700 hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </>
           )}
 
-          <div>
-            <label className="block text-teal-800 font-semibold mb-2">
-              Tipo de usuario
-            </label>
-            <select
-              value={rol}
-              onChange={(e) => setRol(e.target.value)}
-              required
-              className="w-full border border-teal-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="ADMIN">Administrador</option>
-              <option value="PASANTE">Pasante</option>
-            </select>
-          </div>
-
+          {/* Botón de Google (solo para Pasantes) */}
           {rol === "PASANTE" && (
             <>
-              {/* Botón de Google */}
+              <div className="text-center py-4">
+                <p className="text-gray-600 mb-4">
+                  Los pasantes deben iniciar sesión con su cuenta institucional de Google
+                </p>
+              </div>
+
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full mt-4 flex items-center justify-center bg-white border border-gray-300 text-gray-700 font-medium py-3 rounded-lg hover:bg-gray-50 transition-colors shadow-sm animate-fadeIn"
+                className="w-full flex items-center justify-center bg-white border-2 border-gray-300 text-gray-700 font-medium py-3 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -201,45 +237,30 @@ export const Login = () => {
                 Iniciar sesión con Google
               </button>
 
-              <div className="text-right mt-2">
-                <button
-                  type="button"
-                  onClick={() => navigate("/")}
-                  className="text-sm text-teal-700 hover:underline"
-                >
-                  Volver
-                </button>
+              <div className="text-center mt-4">
+                <p className="text-sm text-gray-600">
+                  ¿No tienes cuenta?{" "}
+                  <Link to="/registro" className="text-teal-700 hover:underline font-semibold">
+                    Regístrate aquí
+                  </Link>
+                </p>
               </div>
             </>
           )}
 
-          {rol === "ADMIN" && (
-            <>
-              <button
-                type="submit"
-                className="w-full bg-teal-800 text-white py-3 rounded-lg hover:bg-teal-700 transition-colors mt-6"
-              >
-                Iniciar sesión
-              </button>
-
-              <div className="text-right mt-2">
-                <Link
-                  to="/recuperar"
-                  className="text-sm text-teal-700 hover:underline"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
-            </>
+          {/* Mensaje de error */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
           )}
-
-          {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
         </form>
 
-        <div className="flex justify-between mt-6 w-full max-w-md">
+        {/* Volver al inicio */}
+        <div className="mt-6 w-full max-w-md">
           <Link
             to="/"
-            className="flex items-center text-sm text-teal-800 hover:underline"
+            className="flex items-center justify-center text-sm text-teal-800 hover:underline"
           >
             <FaArrowLeft className="mr-2" /> Volver al inicio
           </Link>
