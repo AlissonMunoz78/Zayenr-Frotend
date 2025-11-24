@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Layout from './components/Layout';
 
 // Home Pública
-import { Home } from './pages/Home';
+import { Home } from './pages/home';
 
 // Auth
 import Login from './pages/auth/Login';
