@@ -1,12 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaUserCircle, FaEnvelope, FaPhone, FaKey, FaSpinner, FaUniversity, FaClock } from 'react-icons/fa';
+import {
+  FaUserCircle,
+  FaEnvelope,
+  FaPhone,
+  FaKey,
+  FaSpinner,
+  FaUniversity,
+  FaClock
+} from 'react-icons/fa';
+
 import api from '../../api/axios';
 import storeAuth from '../../context/storeAuth';
+import UploadProfilePhoto from '../../components/UploadProfilePhoto';
 
 const Profile = () => {
-  const { rol } = storeAuth();
+  const { rol } = storeAuth(); // asegurado
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [celular, setCelular] = useState('');
@@ -14,15 +25,22 @@ const Profile = () => {
 
   useEffect(() => {
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchProfile = async () => {
     try {
       const endpoint = rol === 'pasante' ? '/pasante/perfil' : '/admin/perfil';
+
       const response = await api.get(endpoint);
-      setProfile(response.data);
-      setCelular(response.data.celular || '');
+
+      // Asegurar que venga un objeto válido
+      const data = response.data || {};
+
+      setProfile(data);
+      setCelular(data.celular || '');
     } catch (error) {
+      console.error('Error perfil:', error);
       toast.error('Error al cargar perfil');
     } finally {
       setLoading(false);
@@ -35,10 +53,13 @@ const Profile = () => {
 
     try {
       const endpoint = rol === 'pasante' ? '/pasante/perfil' : '/admin/perfil';
+
       await api.put(endpoint, { celular });
+
       toast.success('Perfil actualizado correctamente');
       fetchProfile();
     } catch (error) {
+      console.error('Error update:', error);
       toast.error(error.response?.data?.msg || 'Error al actualizar perfil');
     } finally {
       setUpdating(false);
@@ -55,36 +76,60 @@ const Profile = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+
       {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h1 className="text-3xl font-playfair font-bold text-teal-800">Mi Perfil</h1>
       </div>
 
+      {/* FOTO PERFIL */}
+      <div className="bg-white rounded-lg shadow-md p-8 mb-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+          Foto de Perfil
+        </h3>
+
+        <UploadProfilePhoto
+          userId={profile?._id}
+          currentPhoto={profile?.fotoPerfil}
+          userType={rol}
+          onPhotoUpdate={(newPhoto) =>
+            setProfile((prev) => ({ ...prev, fotoPerfil: newPhoto }))
+          }
+        />
+      </div>
+
       {/* Profile Card */}
       <div className="bg-white rounded-lg shadow-md p-8">
+
         <div className="flex items-center space-x-6 mb-8">
-          <div className="w-24 h-24 bg-teal-100 rounded-full flex items-center justify-center">
+          <div className="w-24 h-24 bg-teal-100 rounded-full flex items-center justify-center overflow-hidden">
+
             {profile?.fotoPerfil ? (
               <img
                 src={profile.fotoPerfil}
                 alt="Foto de perfil"
-                className="w-full h-full rounded-full object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
               <FaUserCircle className="text-6xl text-teal-800" />
             )}
           </div>
+
           <div>
             <h2 className="text-2xl font-bold text-gray-800">{profile?.nombre}</h2>
             <p className="text-gray-600 capitalize">{profile?.rol || rol}</p>
+
             {profile?.tipo && (
-              <p className="text-sm text-gray-500 capitalize">Tipo: {profile.tipo}</p>
+              <p className="text-sm text-gray-500 capitalize">
+                Tipo: {profile.tipo}
+              </p>
             )}
           </div>
         </div>
 
-        {/* Profile Info */}
+        {/* INFO */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
           <div className="flex items-center space-x-3">
             <FaEnvelope className="text-teal-800 text-xl" />
             <div>
@@ -97,7 +142,9 @@ const Profile = () => {
             <FaPhone className="text-teal-800 text-xl" />
             <div>
               <p className="text-sm text-gray-600">Celular</p>
-              <p className="font-semibold text-gray-800">{profile?.celular || 'No registrado'}</p>
+              <p className="font-semibold text-gray-800">
+                {profile?.celular || 'No registrado'}
+              </p>
             </div>
           </div>
 
@@ -116,15 +163,20 @@ const Profile = () => {
               <FaClock className="text-teal-800 text-xl" />
               <div>
                 <p className="text-sm text-gray-600">Horas de Pasantía</p>
-                <p className="font-semibold text-gray-800">{profile.horasDePasantia} horas</p>
+                <p className="font-semibold text-gray-800">
+                  {profile.horasDePasantia} horas
+                </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Update Form */}
+        {/* UPDATE FORM */}
         <form onSubmit={handleUpdateProfile} className="border-t pt-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Actualizar Información</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">
+            Actualizar Información
+          </h3>
+
           <div className="flex items-end space-x-4">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -140,6 +192,7 @@ const Profile = () => {
                 title="Debe ser un número ecuatoriano válido (09XXXXXXXX)"
               />
             </div>
+
             <button
               type="submit"
               disabled={updating}
@@ -150,7 +203,7 @@ const Profile = () => {
           </div>
         </form>
 
-        {/* Change Password Link */}
+        {/* Change Password */}
         {rol !== 'pasante' && (
           <div className="border-t mt-6 pt-6">
             <Link

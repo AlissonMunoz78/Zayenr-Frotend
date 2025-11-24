@@ -1,131 +1,176 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/axios';
 
-const VisitasList = () => {
-  const [visitas, setVisitas] = useState([]);
-  const [loading, setLoading] = useState(true);
+const CreateVisita = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    institucion: '',
+    cantidadPersonas: '',
+    fechaVisita: '',
+    horaBloque: ''
+  });
+  const [disponibilidad, setDisponibilidad] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchVisitas();
-  }, []);
+  // Fecha mínima: mañana
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
 
-  const fetchVisitas = async () => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    
+    // Si cambia la fecha, consultar disponibilidad
+    if (e.target.name === 'fechaVisita' && e.target.value) {
+      consultarDisponibilidad(e.target.value);
+    }
+  };
+
+  const consultarDisponibilidad = async (fecha) => {
     try {
-      const response = await api.get('/visitas');
-      setVisitas(response.data.visitas);
+      const response = await api.get(`/visitas/disponibilidad?fecha=${fecha}`);
+      setDisponibilidad(response.data);
     } catch (error) {
-      toast.error('Error al cargar visitas');
+      toast.error('Error al consultar disponibilidad');
+      setDisponibilidad(null);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await api.post('/visitas', formData);
+      toast.success('Visita registrada correctamente');
+      navigate('/visitas');
+    } catch (error) {
+      toast.error(error.response?.data?.msg || 'Error al registrar visita');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateStatus = async (id, status) => {
-    let descripcion = '';
-    
-    if (status === 'cancelada') {
-      descripcion = window.prompt('Motivo de cancelación:');
-      if (!descripcion) return;
-    } else {
-      descripcion = 'sin novedad';
-    }
-
-    try {
-      await api.patch(`/visitas/${id}/estado`, { status, descripcion });
-      toast.success(`Visita marcada como ${status}`);
-      fetchVisitas();
-    } catch (error) {
-      toast.error(error.response?.data?.msg || 'Error al actualizar');
-    }
-  };
-
-  if (loading) return <div className="text-center py-12">Cargando...</div>;
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-teal-800">Visitas</h1>
-        <div className="space-x-4">
-          <Link
-            to="/visitas/disponibilidad"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 inline-flex items-center"
-          >
-            Ver Disponibilidad
-          </Link>
-          <Link
-            to="/visitas/crear"
-            className="bg-teal-800 text-white px-6 py-2 rounded-lg hover:bg-teal-700 inline-flex items-center space-x-2"
-          >
-            <FaPlus /> <span>Registrar Visita</span>
-          </Link>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-white rounded-lg shadow-md p-8">
+        <h1 className="text-3xl font-playfair font-bold text-teal-800 mb-6">
+          Registrar Visita Grupal
+        </h1>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-teal-800 text-white">
-            <tr>
-              <th className="px-6 py-3 text-left">Institución</th>
-              <th className="px-6 py-3 text-left">Fecha</th>
-              <th className="px-6 py-3 text-left">Hora</th>
-              <th className="px-6 py-3 text-left">Personas</th>
-              <th className="px-6 py-3 text-left">Estado</th>
-              <th className="px-6 py-3 text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visitas.map((visita) => (
-              <tr key={visita.id} className="border-b hover:bg-gray-50">
-                <td className="px-6 py-4">{visita.institucion}</td>
-                <td className="px-6 py-4">{visita.fechaVisita}</td>
-                <td className="px-6 py-4">{visita.horaBloque}</td>
-                <td className="px-6 py-4">{visita.cantidadPersonas}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                    visita.status === 'realizada' ? 'bg-green-100 text-green-800' :
-                    visita.status === 'cancelada' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {visita.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-center space-x-2">
-                  {visita.status === 'pendiente' && (
-                    <>
-                      <button
-                        onClick={() => handleUpdateStatus(visita.id, 'realizada')}
-                        className="text-green-600 hover:text-green-800 inline-flex items-center space-x-1"
-                        title="Marcar como realizada"
-                      >
-                        <FaCheckCircle />
-                        <span className="text-xs">Realizada</span>
-                      </button>
-                      <button
-                        onClick={() => handleUpdateStatus(visita.id, 'cancelada')}
-                        className="text-red-600 hover:text-red-800 inline-flex items-center space-x-1"
-                        title="Cancelar"
-                      >
-                        <FaTimesCircle />
-                        <span className="text-xs">Cancelar</span>
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {visitas.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            No hay visitas registradas
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-blue-800">
+            ℹ️ Las visitas grupales deben tener entre 2 y 25 personas. Se asignan por bloques de 30 minutos.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Institución
+            </label>
+            <input
+              type="text"
+              name="institucion"
+              placeholder="Universidad XYZ"
+              value={formData.institucion}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+              required
+            />
           </div>
-        )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cantidad de personas (2-25)
+            </label>
+            <input
+              type="number"
+              name="cantidadPersonas"
+              placeholder="15"
+              value={formData.cantidadPersonas}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+              min="2"
+              max="25"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Fecha de visita
+            </label>
+            <input
+              type="date"
+              name="fechaVisita"
+              value={formData.fechaVisita}
+              onChange={handleChange}
+              min={minDate}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Debe ser con al menos 1 día de anticipación (Lunes a Viernes)
+            </p>
+          </div>
+
+          {disponibilidad && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bloque horario disponible
+              </label>
+              <select
+                name="horaBloque"
+                value={formData.horaBloque}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                required
+              >
+                <option value="">Seleccione un horario</option>
+                {disponibilidad.bloques
+                  .filter(bloque => bloque.estado !== 'completo')
+                  .map(bloque => (
+                    <option key={bloque.hora} value={bloque.hora}>
+                      {bloque.hora} - {bloque.disponibles} cupos disponibles
+                      {bloque.estado === 'casi_lleno' ? ' (⚠️ Casi lleno)' : ''}
+                    </option>
+                  ))}
+              </select>
+
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {disponibilidad.bloques.map(bloque => (
+                  <div
+                    key={bloque.hora}
+                    className={`p-2 rounded text-xs text-center ${
+                      bloque.estado === 'completo'
+                        ? 'bg-red-100 text-red-800'
+                        : bloque.estado === 'casi_lleno'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}
+                  >
+                    <div className="font-bold">{bloque.hora}</div>
+                    <div>{bloque.disponibles} disponibles</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !formData.horaBloque}
+            className="w-full bg-teal-800 text-white py-3 rounded-lg hover:bg-teal-700 font-semibold disabled:opacity-50"
+          >
+            {loading ? 'Registrando...' : 'Registrar Visita'}
+          </button>
+        </form>
       </div>
     </div>
   );
 };
 
-export default VisitasList;
+export default CreateVisita;

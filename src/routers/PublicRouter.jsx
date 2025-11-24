@@ -1,16 +1,16 @@
 // src/routers/PublicRoute.jsx
 import { Navigate, Outlet } from "react-router-dom";
-import storeAuth from "../context/storeAuth"; // o '../store/storeAuth' si usas zustand
+import storeAuth from "../context/storeAuth";
 
 const PublicRoute = () => {
-  const token = storeAuth(state => state.token);
+  const token = storeAuth((state) => state.token);
 
-  // Si ya tiene token, redirigir al dashboard
+  // Si ya tiene token, no debe volver a /login ni rutas públicas → redirigir
   if (token) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Si no tiene token, permitir acceder a la ruta pública
+  // Si NO tiene token → puede acceder a /login, /confirmar, etc.
   return <Outlet />;
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import api from '../../api/axios';
 
@@ -15,8 +15,9 @@ const AdminisList = () => {
   const fetchAdminis = async () => {
     try {
       const response = await api.get('/admin/adminis');
-      setAdminis(response.data);
+      setAdminis(response.data || []);
     } catch (error) {
+      console.error(error);
       toast.error('Error al cargar adminis');
     } finally {
       setLoading(false);
@@ -30,6 +31,7 @@ const AdminisList = () => {
       toast.success('Admini eliminado');
       fetchAdminis();
     } catch (error) {
+      console.error(error);
       toast.error(error.response?.data?.msg || 'Error al eliminar');
     }
   };
@@ -40,6 +42,7 @@ const AdminisList = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-teal-800">Adminis</h1>
+
         <Link
           to="/adminis/crear"
           className="bg-teal-800 text-white px-6 py-2 rounded-lg hover:bg-teal-700 flex items-center space-x-2"
@@ -60,6 +63,7 @@ const AdminisList = () => {
               <th className="px-6 py-3 text-center">Acciones</th>
             </tr>
           </thead>
+
           <tbody>
             {adminis.map((admini) => (
               <tr key={admini._id} className="border-b hover:bg-gray-50">
@@ -68,7 +72,18 @@ const AdminisList = () => {
                 <td className="px-6 py-4 capitalize">{admini.tipo}</td>
                 <td className="px-6 py-4">{admini.facultad || '-'}</td>
                 <td className="px-6 py-4">{admini.horasDePasantia || '-'}</td>
-                <td className="px-6 py-4 text-center">
+
+                <td className="px-6 py-4 text-center space-x-4 flex justify-center">
+
+                  {/* Botón Editar (arreglado) */}
+                  <Link
+                    to={`/adminis/editar/${admini._id}`}
+                    className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+                  >
+                    <FaEdit />
+                  </Link>
+
+                  {/* Botón Eliminar */}
                   <button
                     onClick={() => handleDelete(admini._id)}
                     className="text-red-600 hover:text-red-800"
@@ -80,6 +95,7 @@ const AdminisList = () => {
             ))}
           </tbody>
         </table>
+
         {adminis.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             No hay adminis registrados
