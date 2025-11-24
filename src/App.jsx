@@ -1,227 +1,124 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import { Home } from "./pages/home";
-import { Login } from "./pages/Auth/Login";
-import { Register } from "./pages/Auth/Registro";
-import { ConfirmAccount } from "./pages/Auth/ConfirmAccount";
-import { ForgotPassword } from "./pages/Auth/ForgotPassword";
-import { NewPassword } from "./pages/Auth/NewPassword";
-import { NotFound } from "./pages/NotFound";
-import { ResetPassword } from "./pages/Auth/ResetPassword";
+// Layout
+import Layout from './components/Layout';
 
-import Dashboard from "./layouts/Dashboard";
-import DashboardAdmin from "./layouts/DashboardAdmin";
+// Auth
+import Login from './pages/auth/Login';
+import GoogleCallback from './pages/auth/GoogleCallback';
+import ConfirmAccount from './pages/auth/ConfirmAccount';
 
-import AdminPasantes from "./pages/Admin/PerfilAdmin";
-import { FormPasante } from "./components/create/Form";
-import { Crear } from "./pages/pasante/CrearExposicion";
-import Chat from "./pages/Chat";
-import Exposicion from "./pages/pasante/MisExposiciones";
-import Profile from "./pages/Profile";
+// Dashboard
+import Dashboard from './pages/dashboard/Dashboard';
+import Profile from './pages/dashboard/Profile';
+import ChangePassword from './pages/dashboard/ChangePassword';
 
-import List from "./components/list/Table";
-import Details from "./pages/Details";
-import Update from "./pages/Update";
+// Admin
+import AdminisList from './pages/admin/AdminisList';
+import CreateAdmini from './pages/admin/CreateAdmini';
+import PasantesList from './pages/admin/PasantesList';
+import CreatePasante from './pages/admin/CreatePasante';
 
-import ProtectedRouter from "./routers/ProtectedRouter";
-import PrivateRouteWithRole from "./routers/PrivateRouteWhitRole";
+// Visitas
+import VisitasList from './pages/visitas/VisitasList';
+import CreateVisita from './pages/visitas/CreateVisita';
+import Disponibilidad from './pages/visitas/Disponibilidad';
 
-import { Donations } from "./pages/Donations";
-import { DonationsSuccess } from "./pages/DonationsSuccess";
-import { DonationsCancel } from "./pages/DonationsCancel";
+// Donaciones
+import DonacionesList from './pages/donaciones/DonacionesList';
+import DonacionEconomica from './pages/donaciones/DonacionEconomica';
+import DonacionBienes from './pages/donaciones/DonacionBienes';
+import { DonationsSuccess } from './pages/DonationsSuccess';
+import { DonationsCancel } from './pages/DonationsCancel';
 
-// Store para token y rol
-import storeAuth from "./context/storeAuth";
+// Visitantes
+import VisitantesList from './pages/visitantes/VisitantesList';
+import CreateVisitante from './pages/visitantes/CreateVisitante';
 
-// Componente que procesa el callback de OAuth
-function OAuthHandler() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { setToken, setRol } = storeAuth();
-  const [procesando, setProcesando] = useState(true);
-  const [error, setError] = useState("");
+// Error pages
+import { NotFound } from './pages/NotFound';
+import { Forbidden } from './pages/Forbidden';
 
-  useEffect(() => {
-    const procesarCallback = async () => {
-      try {
-        const params = new URLSearchParams(location.search);
-        const token = params.get("token");
-        const rol = params.get("rol");
-        const id = params.get("id");
-        const nombre = params.get("nombre");
-        const email = params.get("email");
-        const facultad = params.get("facultad");
-        const celular = params.get("celular");
-
-        if (!token || !rol) {
-          throw new Error("Parámetros de autenticación incompletos");
-        }
-
-        const rolNormalizado = rol.toLowerCase();
-
-        // Crear objeto usuario completo
-        const usuario = {
-          id: id || "",
-          rol: rolNormalizado,
-          nombre: nombre || "",
-          email: email || "",
-          facultad: facultad || "",
-          celular: celular || "",
-        };
-
-        // Guardar en localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("usuario", JSON.stringify(usuario));
-
-        // Actualizar store de Zustand
-        setToken(token);
-        setRol(rolNormalizado);
-
-        console.log("✅ Autenticación OAuth exitosa:", {
-          rol: rolNormalizado,
-          email: email,
-        });
-
-        // Pequeño delay para asegurar que todo se guarde
-        setTimeout(() => {
-          if (rolNormalizado === "admin") {
-            navigate("/admin/dashboard", { replace: true });
-          } else if (rolNormalizado === "pasante") {
-            navigate("/pasante/dashboard", { replace: true });
-          } else {
-            throw new Error("Rol no reconocido: " + rolNormalizado);
-          }
-          setProcesando(false);
-        }, 500);
-      } catch (err) {
-        console.error("❌ Error en OAuth callback:", err);
-        setError(err.message);
-        setProcesando(false);
-        
-        // Redirigir al login después de 2 segundos
-        setTimeout(() => {
-          navigate("/login", { replace: true });
-        }, 2000);
-      }
-    };
-
-    procesarCallback();
-  }, [location.search, setToken, setRol, navigate]);
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50">
-        <div className="text-center p-8">
-          <div className="text-6xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold text-red-600 mb-2">Error de Autenticación</h2>
-          <p className="text-red-500 mb-4">{error}</p>
-          <p className="text-gray-600">Redirigiendo al login...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (procesando) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-green-50">
-        <div className="text-center p-8">
-          <div className="animate-spin rounded-full h-20 w-20 border-b-4 border-teal-800 mx-auto mb-6"></div>
-          <h2 className="text-2xl font-bold text-teal-800 mb-2">Procesando inicio de sesión...</h2>
-          <p className="text-teal-600">Por favor espera un momento</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-green-50">
-      <div className="text-center p-8">
-        <div className="text-6xl mb-4">✅</div>
-        <h2 className="text-2xl font-bold text-green-600 mb-2">¡Autenticación exitosa!</h2>
-        <p className="text-green-700">Redirigiendo al dashboard...</p>
-      </div>
-    </div>
-  );
-}
+// Routers
+import ProtectedRoute from './routers/ProtectedRouter';
+import PublicRoute from './routers/PublicRouter';
+import PrivateRouteWithRole from './routers/PrivateRouteWhitRole';
 
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      
       <Routes>
-        <Route index element={<Home />} />
-        <Route path="login" element={<Login />} />
-        <Route path="registro" element={<Register />} />
-        <Route path="confirmar/:token" element={<ConfirmAccount />} />
-        <Route path="recuperar" element={<ForgotPassword />} />
-        <Route path="reset/:token" element={<ResetPassword />} />
-        <Route path="nueva-contrasena" element={<NewPassword />} />
+        {/* Rutas Públicas */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/confirmar/:token" element={<ConfirmAccount />} />
+        </Route>
 
-        <Route path="donations" element={<Donations />} />
-        <Route path="donations/success" element={<DonationsSuccess />} />
-        <Route path="donations/cancel" element={<DonationsCancel />} />
+        {/* Callback Google */}
+        <Route path="/auth/callback" element={<GoogleCallback />} />
 
-        {/* Ruta callback OAuth - IMPORTANTE */}
-        <Route path="oauth-callback" element={<OAuthHandler />} />
+        {/* Donaciones públicas */}
+        <Route path="/donacion/exitosa" element={<DonationsSuccess />} />
+        <Route path="/donacion/cancelada" element={<DonationsCancel />} />
 
-        {/* Rutas protegidas */}
-        <Route element={<ProtectedRouter />}>
-          {/* Dashboard pasante */}
-          <Route path="pasante/dashboard/*" element={<Dashboard />}>
-            <Route index element={<Profile />} />
-            <Route path="exposiciones" element={<Exposicion />} />
-            <Route path="listar" element={<List />} />
-            <Route path="visualizar/:id" element={<Details />} />
-            <Route
-              path="crear"
-              element={
-                <PrivateRouteWithRole rolPermitido="pasante">
-                  <Crear />
-                </PrivateRouteWithRole>
-              }
-            />
-            <Route
-              path="actualizar/:id"
-              element={
-                <PrivateRouteWithRole rolPermitido="pasante">
-                  <Update />
-                </PrivateRouteWithRole>
-              }
-            />
-            <Route path="chat" element={<Chat />} />
-          </Route>
+        {/* Rutas Protegidas */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            {/* Dashboard */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/perfil" element={<Profile />} />
+            <Route path="/cambiar-password" element={<ChangePassword />} />
 
-          {/* Dashboard admin */}
-          <Route path="admin/dashboard/*" element={<DashboardAdmin />}>
-            <Route index element={<Profile />} />
-            <Route
-              path="pasantes"
-              element={
-                <PrivateRouteWithRole rolPermitido="admin">
-                  <AdminPasantes />
-                </PrivateRouteWithRole>
-              }
-            />
-            <Route
-              path="exposiciones"
-              element={
-                <PrivateRouteWithRole rolPermitido="admin">
-                  <Exposicion />
-                </PrivateRouteWithRole>
-              }
-            />
-            <Route
-              path="crear"
-              element={
-                <PrivateRouteWithRole rolPermitido="admin">
-                  <Crear />
-                </PrivateRouteWithRole>
-              }
-            />
-            <Route path="chat" element={<Chat />} />
+            {/* Adminis - Solo Administrador */}
+            <Route path="/adminis" element={
+              <PrivateRouteWithRole rolPermitido="administrador">
+                <AdminisList />
+              </PrivateRouteWithRole>
+            } />
+            <Route path="/adminis/crear" element={
+              <PrivateRouteWithRole rolPermitido="administrador">
+                <CreateAdmini />
+              </PrivateRouteWithRole>
+            } />
+
+            {/* Pasantes - Admin y Admini */}
+            <Route path="/pasantes" element={<PasantesList />} />
+            <Route path="/pasantes/crear" element={<CreatePasante />} />
+
+            {/* Visitas */}
+            <Route path="/visitas" element={<VisitasList />} />
+            <Route path="/visitas/crear" element={<CreateVisita />} />
+            <Route path="/visitas/disponibilidad" element={<Disponibilidad />} />
+
+            {/* Donaciones */}
+            <Route path="/donaciones" element={<DonacionesList />} />
+            <Route path="/donaciones/economica" element={<DonacionEconomica />} />
+            <Route path="/donaciones/bienes" element={<DonacionBienes />} />
+
+            {/* Visitantes */}
+            <Route path="/visitantes" element={<VisitantesList />} />
+            <Route path="/visitantes/crear" element={<CreateVisitante />} />
           </Route>
         </Route>
 
+        {/* Redirecciones */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/forbidden" element={<Forbidden />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

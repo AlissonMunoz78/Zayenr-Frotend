@@ -1,48 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { FaCheckCircle, FaTimesCircle, FaSpinner } from 'react-icons/fa';
+import api from '../../api/axios';
 
-export const ConfirmAccount = () => {
+const ConfirmAccount = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  const [mensaje, setMensaje] = useState('');
-  const [error, setError] = useState(false);
+  const [status, setStatus] = useState('loading'); // loading, success, error
 
   useEffect(() => {
-    const confirmarCuenta = async () => {
+    const confirmAccount = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/pasantes/confirmar/${token}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.msg || 'Error al confirmar la cuenta.');
-        }
-
-        setMensaje(data.msg);
-        setError(false);
-
-        // Redirige al login después de 3 segundos
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
-      } catch (err) {
-        setMensaje(err.message);
-        setError(true);
+        const response = await api.get(`/admin/confirmar/${token}`);
+        setStatus('success');
+        toast.success(response.data.msg);
+        setTimeout(() => navigate('/login'), 3000);
+      } catch (error) {
+        setStatus('error');
+        toast.error(error.response?.data?.msg || 'Token inválido o expirado');
       }
     };
 
-    confirmarCuenta();
+    confirmAccount();
   }, [token, navigate]);
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-green-50">
-      <div className="bg-white shadow-md rounded-lg p-10 text-center max-w-md">
-        <h1 className={`text-2xl font-bold ${error ? 'text-red-600' : 'text-teal-800'}`}>
-          {mensaje}
-        </h1>
-        {!error && (
-          <p className="text-teal-700 mt-4">Redirigiendo al inicio de sesión...</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-green-100 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+        {status === 'loading' && (
+          <>
+            <FaSpinner className="text-6xl text-teal-800 animate-spin mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-teal-800 mb-2">Confirmando cuenta...</h2>
+            <p className="text-gray-600">Por favor espera</p>
+          </>
+        )}
+
+        {status === 'success' && (
+          <>
+            <FaCheckCircle className="text-6xl text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-green-700 mb-2">¡Cuenta confirmada!</h2>
+            <p className="text-gray-600 mb-4">
+              Tu cuenta ha sido activada correctamente. Redirigiendo al login...
+            </p>
+            <Link to="/login" className="text-teal-800 hover:underline font-semibold">
+              Ir al login ahora
+            </Link>
+          </>
+        )}
+
+        {status === 'error' && (
+          <>
+            <FaTimesCircle className="text-6xl text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-red-700 mb-2">Error al confirmar</h2>
+            <p className="text-gray-600 mb-4">
+              El token es inválido o ha expirado. Por favor contacta al administrador.
+            </p>
+            <Link
+              to="/login"
+              className="bg-teal-800 text-white px-6 py-2 rounded-lg hover:bg-teal-700 transition inline-block"
+            >
+              Volver al login
+            </Link>
+          </>
         )}
       </div>
     </div>
   );
 };
+
+export default ConfirmAccount;
